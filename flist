@@ -1,0 +1,5 @@
+mv app/build/generated/source/buildConfig/debug/com/example/sweardle2 app/build/generated/source/buildConfig/debug/com/example/sweardle
+mv app/build/intermediates/javac/debug/classes/com/example/sweardle2 app/build/intermediates/javac/debug/classes/com/example/sweardle
+mv app/src/androidTest/java/com/example/sweardle2 app/src/androidTest/java/com/example/sweardle
+mv app/src/main/java/com/example/sweardle2 app/src/main/java/com/example/sweardle
+mv app/src/test/java/com/example/sweardle2 app/src/test/java/com/example/sweardle
