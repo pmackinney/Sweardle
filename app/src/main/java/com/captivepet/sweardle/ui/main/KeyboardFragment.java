@@ -1,22 +1,23 @@
 package com.captivepet.sweardle.ui.main;
 
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.util.Size;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 
-import com.captivepet.sweardle.MainActivity;
 import com.captivepet.sweardle.R;
 
 import java.util.Locale;
@@ -30,7 +31,7 @@ public class KeyboardFragment extends Fragment {
 
     private MainViewModel mViewModel;
     private ConstraintLayout mLayout;
-
+    private char[] letters;
     int mHeight;
     int mWidth;
     int keyHeight;
@@ -39,8 +40,6 @@ public class KeyboardFragment extends Fragment {
     final int PORTRAIT=2;
     final int LANDSCAPE=1;
     int keyboardOrientation;
-    int ENTER=19;
-    int DEL=27;
 
     public KeyboardFragment() {
         // Required empty public constructor ??
@@ -85,29 +84,25 @@ public class KeyboardFragment extends Fragment {
 //        return inflater.inflate(R.layout.fragment_keyboard, container, false);
 //    }
 //}
+    @RequiresApi(api = Build.VERSION_CODES.R)
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-         return inflater.inflate(R.layout.fragment_keyboard, container, false);
+        return inflater.inflate(R.layout.fragment_keyboard, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mViewModel = new ViewModelProvider(this).get(MainViewModel.class);
+        mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
         mLayout = (ConstraintLayout) view;
-        setDimensions(view);
-        ((TextView) ((MainActivity) getContext()).findViewById(R.id.fragmentMessage)).setVisibility(View.GONE);
-        createKeys(mLayout);
-//        mLayout.forceLayout();
     }
 
-    private void setDimensions(View view) {
-        String[] size = ((MainActivity) this.getContext()).getSize().split("x");
-        mWidth = Integer.parseInt(size[0]);
-        mHeight = Integer.parseInt(size[1]);
+    private void setDimensions(Size size) {
+        mWidth = size.getWidth();
+        mHeight = size.getHeight();
         if (mHeight > mWidth) {
             keyboardOrientation = PORTRAIT;
         } else {
@@ -115,115 +110,120 @@ public class KeyboardFragment extends Fragment {
         }
         keyWidth = (int) (Math.min(mWidth, mHeight) / 12);
         keyHeight = (int) (keyWidth * 1.3f);
-        keyMargin = (int) (Math.max(1, 0.1f * keyWidth));
+//        keyMargin = (int) (Math.min(1, 0.1f * keyWidth));
+        keyMargin = 1;
     }
 
-    protected void createKeys(View view) {
+    public void init(Size s) {
+        letters = MainViewModel.LETTERS;
+        setDimensions(s);
         // make all the keys
-        char[] letters = new char[]{'Q', 'W', 'E', 'R',  'T','Y', 'U', 'I', 'O', 'P',
-                'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
-                '+', 'Z', 'X', 'C','V', 'B','N', 'M', '-'};
-        Button[] key = new Button[letters.length];
+        View[] key = new View[letters.length];
         for (int ix = 0; ix < 28; ix++) {
-            Button k = new Button(view.getContext());
+            View k;
+            if (ix == MainViewModel.ENTER || ix == MainViewModel.DEL) {
+                k = new CustomImageButton(mLayout.getContext());
+                ((CustomImageButton) k).setText(String.format(Locale.US, "%c", letters[ix]));
+            } else {
+                k = new Button(mLayout.getContext());
+                ((Button) k).setMaxLines(1);
+                ((Button) k).setGravity(Gravity.CENTER);
+                ((Button) k).setText(String.format(Locale.US, "%c", letters[ix]));
+            }
             mLayout.addView(k);
             k.setId(View.generateViewId());
+            k.setOnClickListener(item -> {
+                mViewModel.keyTap(k);
+            });
             key[ix] = k;
         }
         ConstraintSet set = new ConstraintSet();
-        set.clone((ConstraintLayout) view);
+        set.clone(mLayout);
         for (int ix = 0; ix < 28; ix++) {
-            Button k = key[ix];
+            View k = key[ix];
             int id = k.getId();
-            set.constrainWidth(id, keyWidth);
+            k.setBackground(getResources().getDrawable(R.drawable.frame_grey, null));
+
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                k.setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_NONE);
+//            }
+//            set.setVerticalBias(id, 0.5);
+//            set.setHorizontalBias(id,0.5);
+
+
+            // set key widths & text
+            if (ix == MainViewModel.ENTER) {
+
+                set.constrainWidth(id, 2 * keyWidth);
+            } else if  (ix == MainViewModel.DEL)  {
+
+                set.constrainWidth(id, 2 * keyWidth);
+            } else {
+                    set.constrainWidth(id, keyWidth);
+
+            }
             set.constrainHeight(id, keyHeight);
-            k.setText(String.format(Locale.US, "%c", letters[ix]));
-            k.setGravity(Gravity.CENTER);
-            int top = -1;
-            int left = -1;
-            int right = -1;
-            int bottom = -1;
-            int topS = -1;
-            int leftS = -1;
-            int rightS = -1;
-            int bottomS = -1;
-            if (ix < 10) {
+            int top, left, right, bottom, topS, leftS, rightS, bottomS, topM, leftM, rightM, bottomM;
+            // top & bottom constraints
+            if (ix == 0) {
+                set.setVerticalChainStyle(id, ConstraintSet.CHAIN_PACKED);
                 top = ConstraintSet.PARENT_ID;
                 topS = ConstraintSet.TOP;
-//                bottom = key[10].getId();
-//                bottomS = ConstraintSet.TOP;
-//                bottomM = keyMargin;
-                bottom = -1;
-                bottomS = -1;
-                //set.setVerticalBias(keyId[ix], 1.0f);
-            } else if (ix < 19) {
+                topM = keyHeight / 2;
+                bottom = key[10].getId();
+                bottomS = ConstraintSet.TOP;
+                bottomM = keyMargin;
+            } else if (ix == 10) {
                 top = key[0].getId();
                 topS = ConstraintSet.BOTTOM;
-//                bottom = key[10].getId();
-//                bottomS = ConstraintSet.TOP;
-//                bottomM = keyMargin;
-                bottom = -1;
-                bottomS = -1;
-            } else {
+                topM = 0;
+                bottom = key[19].getId();
+                bottomS = ConstraintSet.TOP;
+                bottomM = keyMargin;
+            } else if (ix == 19) {
                 top = key[10].getId();
                 topS = ConstraintSet.BOTTOM;
+                topM = keyMargin;
                 bottom = ConstraintSet.PARENT_ID;
                 bottomS = ConstraintSet.BOTTOM;
-                set.setVerticalBias(key[ix].getId(), 0f);
+                bottomM = keyHeight / 2;
+            } else {
+                top =  key[ix - 1].getId();
+                topS = ConstraintSet.TOP;
+                topM = 0;
+                bottom = key[ix - 1].getId();
+                bottomS = ConstraintSet.BOTTOM;
+                bottomM = keyMargin;
             }
+            // left & right constraints
             if (ix == 0 || ix == 10 || ix == 19) {
+                set.setHorizontalChainStyle(id, ConstraintSet.CHAIN_PACKED);
                 left = ConstraintSet.PARENT_ID;
                 leftS = ConstraintSet.LEFT;
-            } else {
-                left = -1;
-                leftS = -1;
-//                start = key[ix - 1].getId();
-//                startS = ConstraintSet.END;
-            }
-            if (ix == 9 || ix == 18 || ix == 27) {
+                leftM = 0;
+                right = key[ix + 1].getId();
+                rightS = ConstraintSet.LEFT;
+                rightM = keyMargin;
+            } else if (ix == 9 || ix == 18 || ix == 27) {
+                left = key[ix - 1].getId();
+                leftS = ConstraintSet.RIGHT;
+                leftM = 0;
                 right = ConstraintSet.PARENT_ID;
                 rightS = ConstraintSet.RIGHT;
+                rightM = 0;
             } else {
-                right = -1;
-                rightS = -1;
-//                end = key[ix + 1].getId();
-//                endS = ConstraintSet.START;
+                left = key[ix - 1].getId();
+                leftS = ConstraintSet.RIGHT;
+                leftM = 0;
+                right = key[ix + 1].getId();
+                rightS = ConstraintSet.LEFT;
+                rightM = keyMargin;
             }
-            set.constrainWidth(id, keyWidth);
-            set.constrainHeight(id, keyHeight);
-            if (top != -1) {
-                set.connect(id, ConstraintSet.TOP, top, topS);
-            } else {
-                set.clear(id, ConstraintSet.TOP);
-            }
-            if (bottom != -1) {
-                set.connect(id, ConstraintSet.BOTTOM, bottom, bottomS, keyMargin);
-            } else {
-                set.clear(id, ConstraintSet.BOTTOM);
-            }
-            if (left != -1) {
-                set.connect(id, ConstraintSet.LEFT, left, leftS);
-            } else {
-                set.clear(id, ConstraintSet.LEFT);
-            }
-            if (right != -1) {
-                set.connect(id, ConstraintSet.RIGHT, right, rightS);
-            } else {
-                set.clear(id, ConstraintSet.RIGHT);
-            }
-            // set.setVerticalChainStyle(id, ConstraintSet.CHAIN_PACKED);
-            set.setHorizontalChainStyle(id, ConstraintSet.CHAIN_PACKED);
-            set.setHorizontalChainStyle(id, ConstraintSet.CHAIN_PACKED);
-            set.setHorizontalChainStyle(id, ConstraintSet.CHAIN_PACKED);
+            set.connect(id, ConstraintSet.TOP, top, topS, topM);
+            set.connect(id, ConstraintSet.BOTTOM, bottom, bottomS, bottomM);
+            set.connect(id, ConstraintSet.LEFT, left, leftS, leftM);
+            set.connect(id, ConstraintSet.RIGHT, right, rightS, rightM);
         }
-
-        // set special keys
-
-        key[ENTER].setText("ENTER");
-        set.constrainWidth(key[ENTER].getId(), 2 * keyWidth);
-        key[DEL].setText("DEL");
-        set.constrainWidth(key[DEL].getId(), 2 * keyWidth);
-
         set.applyTo(mLayout);
     }
 }

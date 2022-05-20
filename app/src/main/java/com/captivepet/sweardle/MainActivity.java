@@ -1,17 +1,16 @@
 package com.captivepet.sweardle;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import android.content.Context;
-import android.content.res.Configuration;
-import android.os.Build;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.content.res.ResourcesCompat;
+
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Size;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.WindowMetrics;
+import android.view.ViewTreeObserver;
 import android.widget.TextView;
 
 import com.captivepet.sweardle.ui.main.KeyboardFragment;
@@ -19,10 +18,13 @@ import com.captivepet.sweardle.ui.main.MainFragment;
 
 import java.util.Locale;
 
-import kotlin.Suppress;
-
 public class MainActivity extends AppCompatActivity {
-    Size windowSize;
+    public Size windowSize;
+    public final static Drawable[] frame = new Drawable[4];
+    public final static int ROW_COUNT = 6;
+    public final static int WORD_LENGTH = 5;
+    MainFragment tiles;
+    KeyboardFragment keys;
     ViewGroup container;
 
     @Override
@@ -32,28 +34,23 @@ public class MainActivity extends AppCompatActivity {
         container = findViewById(R.id.container);
 
         View parent = (View) container.getParent();
-        parent.post(new Runnable() {
-            public void run() {
+        parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 windowSize = new Size(container.getMeasuredWidth(), container.getMeasuredHeight());
+                tiles.init(windowSize);
+                keys.init(windowSize);
             }
         });
 
         if (savedInstanceState == null) {
+            tiles = MainFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(
-                    R.id.main_fragment, MainFragment.newInstance()).commitNow();
+                    R.id.main_fragment, tiles).commitNow();
+            keys = KeyboardFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(
-                    R.id.keyboard_fragment, KeyboardFragment.newInstance()).commitNow();
+                    R.id.keyboard_fragment, keys).commitNow();
         }
-    }
-
-    public String getSize() {
-        if (windowSize == null || windowSize.getWidth() == 0 || windowSize.getHeight() == 0) {
-            windowSize = new Size(container.getMeasuredWidth(), container.getMeasuredHeight());
-        }
-        return windowSize.toString();
-    }
-
-    public void update(View view) {
-        ((TextView) view).setText(String.format(Locale.US, "Size: %s", getSize()));
     }
 }
