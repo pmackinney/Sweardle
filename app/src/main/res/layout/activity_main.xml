@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:weightSum="1"
     tools:context=".MainActivity" >
 
     <androidx.fragment.app.FragmentContainerView
@@ -12,13 +13,14 @@
         android:layout_height="wrap_content"
         android:id="@+id/main_fragment"
         android:layout_gravity="top"
+        android:layout_weight="1"
         tools:layout="@layout/fragment_main" />
 
     <androidx.fragment.app.FragmentContainerView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_weight="1"
+        android:layout_weight="0"
         android:id="@+id/keyboard_fragment"
         tools:layout="@layout/fragment_keyboard" />
 

@@ -1,8 +1,9 @@
 package com.captivepet.sweardle.ui.main;
+import static com.captivepet.sweardle.R.id.fragment_game;
 
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.graphics.drawable.Drawable;
@@ -12,104 +13,108 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.util.Size;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
-import android.widget.TextView;
-
-import com.captivepet.sweardle.MainActivity;
 import com.captivepet.sweardle.R;
+import com.captivepet.sweardle.TilePair;
 
-import java.util.Locale;
-import java.util.concurrent.ExecutionException;
+import java.util.ArrayList;
 
-import javax.sql.RowSetWriter;
+public class GameFragment extends Fragment {
 
-public class MainFragment extends Fragment {
-
-    int mHeight;
-    int mWidth;
-    ConstraintLayout mLayout;
+    private ConstraintLayout mLayout;
     private MainViewModel mViewModel;
     int tileWidth;
-    int ROW_COUNT = MainActivity.ROW_COUNT;
-    int WORD_LENGTH = MainActivity.WORD_LENGTH;
+    public final static int ROW_COUNT = 6;
+    public final static int WORD_LENGTH = 5;
+    final static char EMPTY = ' ';
 
     final Button[] tile = new Button[ROW_COUNT * WORD_LENGTH];
     final int TILE_MARGIN = 1;
 
-    //    /**
-//     * Use this factory method to create a new instance of
-//     * this fragment using the provided parameters.
-//     *
-//     * @param param1 Parameter 1.
-//     * @param param2 Parameter 2.
-//     * @return A new instance of fragment KeyboardFragment.
-//     */
-//    public static MainFragment newInstance(String param1, String param2) {
-//        KeyboardFragment fragment = new KeyboardFragment();
-//        Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        args.putString(ARG_PARAM2, param2);
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
-    public static MainFragment newInstance() {
-        return new MainFragment();
+    public static GameFragment newInstance() {
+        return new GameFragment();
     }
 
     @Nullable
     @Override
     public View onCreateView(
-            @NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-            @Nullable Bundle savedInstanceState
-    ) {
-        return inflater.inflate(R.layout.fragment_main, container, false);
+            @NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_game, container, false);
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mLayout = (ConstraintLayout) view.findViewById(fragment_game);
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        mViewModel.init();
-        mLayout = (ConstraintLayout) view;
+        mViewModel.getSignal().observe(getViewLifecycleOwner(), item -> {
+            displayGame();
+        });
+
+        View parent = (View) mLayout.getParent();
+        parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                mViewModel.init(getResources().getStringArray(R.array.words));
+            }
+        });
+    }
+    public void displayGame() {
+        ArrayList<TilePair> row = (ArrayList<TilePair>) mViewModel.getCurrentRow().clone();
+        int rowsDone = mViewModel.getRowsDone();
+        if (mViewModel.getTESTED()) {
+            mViewModel.newRow();
+        }
+        int nextChar = row.size();
+        int startOfRow = rowsDone * WORD_LENGTH;
+        for (int ix = 0; ix < row.size(); ix++) {
+            char c = row.get(ix).getC();
+            Drawable d = AppCompatResources.getDrawable(requireContext(), row.get(ix).getD());
+            setTile(startOfRow + ix, c, d);
+        }
+        if (row.size() < WORD_LENGTH) { // handle backspace
+            setTile(startOfRow + nextChar, EMPTY, AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
+        }
     }
 
-    private void setDimensions(Size s) {
-        mWidth = s.getWidth();
-        mHeight = s.getHeight();
-        tileWidth = Math.min(mWidth, mHeight) / (WORD_LENGTH + 2);
-    }
-
-    public void init(Size s) {
-        setDimensions(s);
+    public void init(int height) {
+        tileWidth = (int) (height / (WORD_LENGTH + 1));
         // make all the tiles;
         for (int ix = 0; ix < ROW_COUNT * WORD_LENGTH; ix++) {
             Button k = new Button(mLayout.getContext());
             mLayout.addView(k);
             k.setId(View.generateViewId());
+            k.setTextColor(AppCompatResources.getColorStateList(requireContext(), R.color.black));
             tile[ix] = k;
         }
         ConstraintSet set = new ConstraintSet();
         set.clone(mLayout);
         for (int ix = 0; ix < ROW_COUNT * WORD_LENGTH; ix++) {
+            setTile(ix, ' ', AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
             Button k = tile[ix];
+            k.setEnabled(false);
+
             int id = k.getId();
-            k.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_white, null));
             k.setGravity(Gravity.CENTER);
-            // set tile widths & text
+            // set tile widths
             set.constrainWidth(id, tileWidth);
             set.constrainHeight(id, tileWidth);
+            set.constrainMaxHeight(id, tileWidth);
             int top, left, right, bottom, topS, leftS, rightS, bottomS, topM, leftM, rightM, bottomM;
             // top & bottom constraints
             if (ix == 0) {
                 set.setVerticalChainStyle(id, ConstraintSet.CHAIN_PACKED);
                 top = ConstraintSet.PARENT_ID;
                 topS = ConstraintSet.TOP;
-                topM = tileWidth;
+                topM = tileWidth / 2;
                 bottom = tile[ix + WORD_LENGTH].getId();
                 bottomS = ConstraintSet.TOP;
                 bottomM = TILE_MARGIN;
@@ -119,7 +124,7 @@ public class MainFragment extends Fragment {
                 topM = TILE_MARGIN;
                 bottom = ConstraintSet.PARENT_ID;
                 bottomS = ConstraintSet.BOTTOM;
-                bottomM = tileWidth;
+                bottomM = tileWidth / 2;
             } else if (ix % WORD_LENGTH == 0) {
                 top = tile[ix - WORD_LENGTH].getId();
                 topS = ConstraintSet.BOTTOM;
@@ -166,19 +171,8 @@ public class MainFragment extends Fragment {
         }
         set.applyTo(mLayout);
     }
-
-    public void setTile(int ix, String c, Drawable d) {
-        tile[ix].setText(c);
+    public void setTile(int ix, char c, Drawable d) {
+        tile[ix].setText(String.format("%c", c));
         tile[ix].setBackground(d);
     }
-
-    public void update(int pos, String key, Drawable color) {
-        tile[pos].setText(key);
-        tile[pos].setBackground(color);
-    }
-
-    public void update(int pos, Drawable color) {
-        tile[pos].setBackground(color);
-    }
 }
-

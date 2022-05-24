@@ -1,113 +1,124 @@
 package com.captivepet.sweardle.ui.main;
 
-import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.util.HashMap;
-import com.captivepet.sweardle.R;
+import java.sql.Time;
+import java.util.ArrayList;
+import java.util.Locale;
+
+import com.captivepet.sweardle.CustomImageButton;
+import com.captivepet.sweardle.TilePair;
 
 public class MainViewModel extends ViewModel {
 
-    public static final char[] LETTERS = new char[]{'Q', 'W', 'E', 'R',  'T','Y', 'U', 'I', 'O', 'P',
+    private static final String TAG = "SWEARBUG";
+    public static final char[] KEY_LABEL = new char[]{'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
             'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
-            '+', 'Z', 'X', 'C','V', 'B','N', 'M', '-'};
-    private final HashMap<Character, Integer> keyMap = new HashMap<Character, Integer>(28);
-    final static int READY_STATE = 0;
-    final static int WAITING_STATE = 1;
-    final static int DONE_STATE = 3;
-    int state = READY_STATE;
-    final static int ENTER = 19;
-    final static int DEL = 27;
-    final static int ROW_COUNT = 6;
-    final static int WORD_LENGTH = 5;
+            '↵', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '←'};
 
-    String[] colors = new String[]{"white", "green", "grey", "ochre"};
-    int charCount = 0;
-    int lastColor = 0;
-    char[] gameBoard = new char[ROW_COUNT * WORD_LENGTH];
-    int gamePointer;
-
-    public void setCurrentWord(String currentWord) {
-        this.currentWord = currentWord;
-    }
-
-    private String currentWord;
-    MainFragment mFragment;
-
-    void init() {
-        for (int ix = 0; ix < LETTERS.length; ix++) {
-            keyMap.put(LETTERS[ix], ix);
+    final static int ENTER = '↵';
+    final static int DEL = '←';
+    private MutableLiveData<String> signal;
+    public MutableLiveData<String> getSignal() {
+        if (signal == null) {
+            signal = new MutableLiveData<String>();
         }
+        return signal;
+    }
+    private String gameWord;
+    private int rowsDone = 0;
+    private boolean TESTED = false;
+    public boolean getTESTED () {
+        return TESTED;
+    };
+    public void setTESTED (boolean b) {
+        TESTED = b;
+    }
+    private boolean WINNER = false;
+    private ArrayList<TilePair> currentRow = new ArrayList<>();
+    public ArrayList<TilePair> getCurrentRow() { return currentRow; }
+    public void clearCurrentRow() { currentRow.clear(); }
+
+    private String getWord() {
+        return gameWord;
     }
 
-    public void setMainFragment(MainFragment mf) {
-        this.mFragment = mf;
+    public void setGameWord(String gameWord) {
+        this.gameWord = gameWord;
     }
 
-    public void keyTap(View view) {
-        String key = "";
+    void init(String[] dict) {
+        gameWord = dict[(int) (Math.random() * dict.length)];
+    }
+
+    public void onClick(View view) {
+        char keyChar;
         int ix;
-        if (view instanceof Button) {
-            key = ((Button) view).getText().toString();
-        } else if (view instanceof CustomImageButton) {
-            key = ((CustomImageButton) view).getText().toString();
+        int position = currentRow.size();
+        if (view instanceof CustomImageButton) {
+            keyChar = ((CustomImageButton) view).getText().charAt(0);
+        }else{
+            keyChar = ((Button) view).getText().charAt(0);
         }
-       ix = keyMap.get(key);
-        switch(state) {
-        case WAITING_STATE:
-            if (ix == ENTER) {
-                testWord();
-            } else if (ix == DEL) {
-                backspace();
-            }
-            break;
-        case DONE_STATE:
-            break;
-        default:
-            if (ix == DEL) {
-                backspace();
-            } else if (ix != ENTER) {
-                addTile(key);
-            }
+        Log.d(TAG, String.format(Locale.US, "keytap: %c", keyChar));
+        if (keyChar == ENTER && !TESTED && position == GameFragment.WORD_LENGTH) {
+            WINNER = testWord();
+            TESTED = true;
+        } else if (keyChar == DEL && !TESTED && position > 0) {
+            currentRow.remove(position - 1);
+        } else if (position < GameFragment.WORD_LENGTH) { // letter key
+            currentRow.add(new TilePair(keyChar, TilePair.UNCHECKED));
         }
+        signal.setValue("signal");
     }
 
-    private void addTile(String key) {
-        Drawable color = mFragment.getContext().getDrawable(R.drawable.frame_white);
-        gameBoard[gamePointer] = key.charAt(0);
-        mFragment.update(gamePointer, key, color);
-        gamePointer++;
+    public void newRow() {
+        rowsDone++;
+        currentRow.clear();
+        TESTED = false;
     }
 
-    private void testWord() {
-        boolean win = true;
-        if (gamePointer % WORD_LENGTH == 0) {
-            Drawable color = mFragment.getContext().getDrawable(R.drawable.frame_grey);
-            for (int ix = 0; ix < WORD_LENGTH; ix++) {
-                if (currentWord.charAt(ix) == gameBoard[gamePointer - WORD_LENGTH + ix]) {
-                    color = mFragment.getContext().getDrawable(R.drawable.frame_green);
-                } else if (currentWord.contains(String.valueOf(gameBoard[gamePointer - WORD_LENGTH + ix]))) {
-                    color = mFragment.getContext().getDrawable(R.drawable.frame_ochre); // TODO check for letter count in word
-                    win = false;
-                } else {
-                    win = false;
+    private boolean testWord() {
+        boolean WIN = true;
+        if (currentRow == null) {
+            return false;
+        }
+        int position = currentRow.size();
+        if (position > 0 && position % GameFragment.WORD_LENGTH == 0) {
+            TilePair[] guess = new TilePair[GameFragment.WORD_LENGTH];
+            for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix ++) {
+                guess[ix] = currentRow.get(position - GameFragment.WORD_LENGTH + ix);
+            }
+            char[] word = gameWord.toCharArray();
+            for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) {
+                for (int jx = 0; jx < GameFragment.WORD_LENGTH; jx++) {
+                    if (word[ix] == guess[jx].getC()) {
+                        if (ix == jx) {
+                            guess[jx].setD(TilePair.CORRECT);
+                            break;
+                        } else if (guess[jx].getD() == TilePair.UNCHECKED) {
+                            guess[jx].setD(TilePair.MISPLACED);
+                            WIN = false;
+                            break;
+                        }
+                    }
                 }
             }
-            mFragment.update(gamePointer, color);
-            gamePointer++;
-            if (win) {
-                state = DONE_STATE;
+            for (int jx = 0; jx < GameFragment.WORD_LENGTH; jx++) {
+                if (guess[jx].getD() == TilePair.UNCHECKED) {
+                    guess[jx].setD(TilePair.INCORRECT);
+                    WIN = false;
+                }
             }
         }
+        return WIN;
     }
-
-    private void backspace() {
-        if (gamePointer % WORD_LENGTH > 0) {
-            gamePointer--;
-            mFragment.update(gamePointer, "", mFragment.getContext().getDrawable(R.drawable.frame_white));
-        }
+    public int getRowsDone() {
+        return rowsDone;
     }
 }

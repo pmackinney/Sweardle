@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
@@ -17,73 +18,31 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-
+import com.captivepet.sweardle.CustomImageButton;
 import com.captivepet.sweardle.R;
-
+import com.captivepet.sweardle.TilePair;
 import java.util.Locale;
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link KeyboardFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Builds the keyboard which never changes
  */
 public class KeyboardFragment extends Fragment {
 
     private MainViewModel mViewModel;
     private ConstraintLayout mLayout;
-    private char[] letters;
-    int mHeight;
-    int mWidth;
-    int keyHeight;
-    int keyWidth;
-    int keyMargin;
-    final int PORTRAIT=2;
-    final int LANDSCAPE=1;
-    int keyboardOrientation;
+    private int keyHeight;
+    private int keyWidth;
+    private int keyMargin;
+    private View[] key;
 
     public KeyboardFragment() {
         // Required empty public constructor ??
     }
 
-//    /**
-//     * Use this factory method to create a new instance of
-//     * this fragment using the provided parameters.
-//     *
-//     * @param param1 Parameter 1.
-//     * @param param2 Parameter 2.
-//     * @return A new instance of fragment KeyboardFragment.
-//     */
-    // TODO: Rename and change types and number of parameters
-//    public static KeyboardFragment newInstance(String param1, String param2) {
-//        KeyboardFragment fragment = new KeyboardFragment();
-//        Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        args.putString(ARG_PARAM2, param2);
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
     public static KeyboardFragment newInstance() {
         return new KeyboardFragment();
     }
 
-//    @Override
-//    public void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        if (getArguments() != null) {
-//            mParam1 = getArguments().getString(ARG_PARAM1);
-//            mParam2 = getArguments().getString(ARG_PARAM2);
-//        }
-//    }
-
-//    @Override
-//    public View onCreateView(
-//            LayoutInflater inflater, ViewGroup container,
-//            Bundle savedInstanceState
-//    ) {
-//        // Inflate the layout for this fragment
-//        return inflater.inflate(R.layout.fragment_keyboard, container, false);
-//    }
-//}
     @RequiresApi(api = Build.VERSION_CODES.R)
     @Nullable
     @Override
@@ -95,72 +54,79 @@ public class KeyboardFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+        mViewModel.getSignal().observe(getViewLifecycleOwner(), item -> {
+            updateKeys();
+        });
+
         mLayout = (ConstraintLayout) view;
     }
 
-    private void setDimensions(Size size) {
-        mWidth = size.getWidth();
-        mHeight = size.getHeight();
+    public int init(Size s) {
+        int mWidth = s.getWidth();
+        int mHeight = s.getHeight();
+        int keyboardWidth, keyboardHeight, gameboardHeight;
+        int PORTRAIT = 0;
+        int LANDSCAPE = 1;
+        int keyboardOrientation;
         if (mHeight > mWidth) {
             keyboardOrientation = PORTRAIT;
+            keyboardWidth = mWidth;
+            // total height of kb is at least 1/3 of screen
+            keyboardHeight = Math.max((int)(mHeight * 0.333f), keyboardWidth / 4 + keyMargin * 3);
+            keyWidth = (mWidth - 4 * keyMargin) / 10;
+            keyHeight = Math.min((keyboardHeight - keyMargin * 3) / 3, (3 * keyWidth) / 2);
+            gameboardHeight = Math.min(mWidth, mHeight - keyboardHeight);
         } else {
-            keyboardOrientation = LANDSCAPE;
+            gameboardHeight = mHeight;
+            keyboardWidth = mWidth / 2;
+            keyboardOrientation = LANDSCAPE; //TODO
         }
-        keyWidth = (int) (Math.min(mWidth, mHeight) / 12);
-        keyHeight = (int) (keyWidth * 1.3f);
-//        keyMargin = (int) (Math.min(1, 0.1f * keyWidth));
-        keyMargin = 1;
-    }
-
-    public void init(Size s) {
-        letters = MainViewModel.LETTERS;
-        setDimensions(s);
-        // make all the keys
-        View[] key = new View[letters.length];
+        keyMargin = 2;
+        // make the keys
+        char[] keyLabel = MainViewModel.KEY_LABEL;
+        key = new View[keyLabel.length];
         for (int ix = 0; ix < 28; ix++) {
             View k;
-            if (ix == MainViewModel.ENTER || ix == MainViewModel.DEL) {
-                k = new CustomImageButton(mLayout.getContext());
-                ((CustomImageButton) k).setText(String.format(Locale.US, "%c", letters[ix]));
+            if (keyLabel[ix] == MainViewModel.ENTER) {
+                k = new CustomImageButton(mLayout.getContext(), keyLabel[ix]);
+                CustomImageButton kcb = (CustomImageButton) k;
+                kcb.setImageResource(R.drawable.ic_baseline_keyboard_return_24);
+            } else if (keyLabel[ix] == MainViewModel.DEL) {
+                k = new CustomImageButton(mLayout.getContext(), keyLabel[ix]);
+                CustomImageButton kcb = (CustomImageButton) k;
+                kcb.setImageResource(R.drawable.ic_baseline_undo_24);
             } else {
                 k = new Button(mLayout.getContext());
                 ((Button) k).setMaxLines(1);
                 ((Button) k).setGravity(Gravity.CENTER);
-                ((Button) k).setText(String.format(Locale.US, "%c", letters[ix]));
+                ((Button) k).setText(String.format(Locale.US, "%c", keyLabel[ix]));
             }
+            k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
             mLayout.addView(k);
             k.setId(View.generateViewId());
-            k.setOnClickListener(item -> {
-                mViewModel.keyTap(k);
+            k.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mViewModel.onClick(view);
+                }
             });
             key[ix] = k;
         }
+        // position the keys
         ConstraintSet set = new ConstraintSet();
         set.clone(mLayout);
         for (int ix = 0; ix < 28; ix++) {
             View k = key[ix];
             int id = k.getId();
-            k.setBackground(getResources().getDrawable(R.drawable.frame_grey, null));
-
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                k.setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_NONE);
-//            }
-//            set.setVerticalBias(id, 0.5);
-//            set.setHorizontalBias(id,0.5);
-
-
             // set key widths & text
-            if (ix == MainViewModel.ENTER) {
-
-                set.constrainWidth(id, 2 * keyWidth);
-            } else if  (ix == MainViewModel.DEL)  {
-
-                set.constrainWidth(id, 2 * keyWidth);
+            if (keyLabel[ix] == MainViewModel.ENTER) {
+                set.constrainWidth(id, (int) (1.5f * keyWidth));
+            } else if (keyLabel[ix] == MainViewModel.DEL)  {
+                ((CustomImageButton) k).setImageResource(R.drawable.ic_baseline_undo_24);
+                set.constrainWidth(id, (int) (1.5f * keyWidth));
             } else {
-                    set.constrainWidth(id, keyWidth);
-
+                set.constrainWidth(id, keyWidth);
             }
             set.constrainHeight(id, keyHeight);
             int top, left, right, bottom, topS, leftS, rightS, bottomS, topM, leftM, rightM, bottomM;
@@ -169,7 +135,7 @@ public class KeyboardFragment extends Fragment {
                 set.setVerticalChainStyle(id, ConstraintSet.CHAIN_PACKED);
                 top = ConstraintSet.PARENT_ID;
                 topS = ConstraintSet.TOP;
-                topM = keyHeight / 2;
+                topM = keyHeight / 4;
                 bottom = key[10].getId();
                 bottomS = ConstraintSet.TOP;
                 bottomM = keyMargin;
@@ -186,7 +152,7 @@ public class KeyboardFragment extends Fragment {
                 topM = keyMargin;
                 bottom = ConstraintSet.PARENT_ID;
                 bottomS = ConstraintSet.BOTTOM;
-                bottomM = keyHeight / 2;
+                bottomM = keyHeight / 4;
             } else {
                 top =  key[ix - 1].getId();
                 topS = ConstraintSet.TOP;
@@ -225,5 +191,21 @@ public class KeyboardFragment extends Fragment {
             set.connect(id, ConstraintSet.RIGHT, right, rightS, rightM);
         }
         set.applyTo(mLayout);
+        return(gameboardHeight);
+    }
+
+    private void updateKeys() {
+        for (int ix = 0; ix < key.length; ix++) {
+            for (TilePair t : mViewModel.getCurrentRow()) {
+                Button k;
+                if (key[ix] instanceof Button) {
+                    k = (Button) key[ix];
+                    if (k.getText().charAt(0) == t.getC()) {
+                        k.setBackground(AppCompatResources.getDrawable(requireContext(), t.getD()));
+                        break;
+                    }
+                }
+            }
+        }
     }
 }
