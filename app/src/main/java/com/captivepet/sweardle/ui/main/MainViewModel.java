@@ -95,21 +95,24 @@ public class MainViewModel extends ViewModel {
                 guess[ix] = currentRow.get(position - GameFragment.WORD_LENGTH + ix);
             }
             char[] word = gameWord.toCharArray();
-            for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) {
+            for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) { // find correct
+                if (word[ix] == guess[ix].getC()) {
+                    guess[ix].setD(TilePair.CORRECT);
+                    word[ix] = GameFragment.EMPTY;
+                }
+            }
+            for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) { // find misplaced
                 for (int jx = 0; jx < GameFragment.WORD_LENGTH; jx++) {
-                    if (word[ix] == guess[jx].getC()) {
-                        if (ix == jx) {
-                            guess[jx].setD(TilePair.CORRECT);
-                            break;
-                        } else if (guess[jx].getD() == TilePair.UNCHECKED) {
-                            guess[jx].setD(TilePair.MISPLACED);
-                            WIN = false;
-                            break;
-                        }
+                    if (word[ix] == GameFragment.EMPTY) {
+                        continue; // already matched
+                    } else if (word[ix] == guess[jx].getC() && guess[jx].getD() == TilePair.UNCHECKED) {
+                        guess[jx].setD(TilePair.MISPLACED);
+                        WIN = false;
+                        break; // word[ix] only gets one match
                     }
                 }
             }
-            for (int jx = 0; jx < GameFragment.WORD_LENGTH; jx++) {
+            for (int jx = 0; jx < GameFragment.WORD_LENGTH; jx++) { // the rest are wrong
                 if (guess[jx].getD() == TilePair.UNCHECKED) {
                     guess[jx].setD(TilePair.INCORRECT);
                     WIN = false;
