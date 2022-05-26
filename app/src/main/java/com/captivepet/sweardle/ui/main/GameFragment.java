@@ -6,6 +6,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
@@ -13,14 +15,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
+import android.widget.Toast;
+
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
 
@@ -31,6 +33,11 @@ public class GameFragment extends Fragment {
     private ConstraintLayout mLayout;
     private MainViewModel mViewModel;
     int tileWidth;
+    public static final String READY = "Ready";
+    public static final String WINNER = "Winner";
+    public static final String ROW_UPDATED = "ready for keyboard update";
+    public static final String KEYS_UPDATED = "ready for next row";
+    public boolean rowUpdated;
     public final static int ROW_COUNT = 6;
     public final static int WORD_LENGTH = 5;
     final static char EMPTY = ' ';
@@ -41,6 +48,7 @@ public class GameFragment extends Fragment {
     public static GameFragment newInstance() {
         return new GameFragment();
     }
+    AlertDialog.Builder builder;
 
     @Nullable
     @Override
@@ -54,8 +62,8 @@ public class GameFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mLayout = (ConstraintLayout) view.findViewById(fragment_game);
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        mViewModel.getSignal().observe(getViewLifecycleOwner(), item -> {
-            displayGame();
+        mViewModel.getGameSignal().observe(getViewLifecycleOwner(), item -> {
+            updateRow(item);
         });
 
         View parent = (View) mLayout.getParent();
@@ -67,7 +75,12 @@ public class GameFragment extends Fragment {
             }
         });
     }
-    public void displayGame() {
+
+    public void updateRow(String signal) {
+        if ("Bad word".equals(signal)) {
+            badWordAlert();
+            return;
+        }
         ArrayList<TilePair> row = (ArrayList<TilePair>) mViewModel.getCurrentRow().clone();
         int rowsDone = mViewModel.getRowsDone();
         if (mViewModel.getTESTED()) {
@@ -82,6 +95,9 @@ public class GameFragment extends Fragment {
         }
         if (row.size() < WORD_LENGTH) { // handle backspace
             setTile(startOfRow + nextChar, EMPTY, AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
+        }
+        if (WINNER.equals(signal) || mViewModel.getRowsDone() == ROW_COUNT) {
+            newGameQuery();
         }
     }
 
@@ -170,9 +186,50 @@ public class GameFragment extends Fragment {
             set.connect(id, ConstraintSet.RIGHT, right, rightS, rightM);
         }
         set.applyTo(mLayout);
+        rowUpdated = false;
     }
+
     public void setTile(int ix, char c, Drawable d) {
         tile[ix].setText(String.format("%c", c));
         tile[ix].setBackground(d);
+        rowUpdated = false;
+    }
+
+    private String newGameMessage() {
+        return "Play a new game?";
+    }
+
+    // https://www.javatpoint.com/android-alert-dialog-example
+    private void newGameQuery() {
+        builder = new AlertDialog.Builder(getContext());
+        builder.setMessage(newGameMessage()).setTitle("Game Over man").setCancelable(false)
+            .setPositiveButton("New Game", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+//                        finish();
+                    Toast.makeText(requireContext().getApplicationContext(),"you choose New Game",
+                            Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton("Quit", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    //  Action for 'NO' Button
+                    dialog.cancel();
+                    Toast.makeText(requireContext().getApplicationContext(),"you choose Quit",
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
+        //Creating dialog box
+        AlertDialog alert = builder.create();
+        //Setting the title manually
+//        alert.setTitle("AlertDialogExample");
+        alert.show();
+    }
+
+    // https://www.javatpoint.com/android-alert-dialog-example
+    private void badWordAlert() {
+        Toast t = Toast.makeText(requireContext().getApplicationContext(),
+                "Sorry, I don't know that word", Toast.LENGTH_LONG);
+        t.setGravity(Gravity.CENTER, 0, 0);
+        t.show();
     }
 }

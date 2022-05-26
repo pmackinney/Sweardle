@@ -14,7 +14,7 @@ import com.captivepet.sweardle.ui.main.KeyboardFragment;
 public class MainActivity extends AppCompatActivity {
     public Size windowSize;
     GameFragment tile;
-    KeyboardFragment key;
+    KeyboardFragment keyboard;
     ViewGroup container;
 
     @Override
@@ -29,15 +29,15 @@ public class MainActivity extends AppCompatActivity {
             public void onGlobalLayout() {
                 parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 windowSize = new Size(container.getMeasuredWidth(), container.getMeasuredHeight());
-                int tileSize = key.init(windowSize);
+                int tileSize = keyboard.init(windowSize);
                 tile.init(tileSize);
             }
         });
 
         if (savedInstanceState == null) {
-            key = KeyboardFragment.newInstance();
+            keyboard = KeyboardFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(
-                    R.id.keyboard_fragment, key).commitNow();
+                    R.id.keyboard_fragment, keyboard).commitNow();
             tile = GameFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(
                     R.id.main_fragment, tile).commitNow();

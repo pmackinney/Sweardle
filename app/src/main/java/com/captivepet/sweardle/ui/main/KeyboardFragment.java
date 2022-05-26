@@ -1,5 +1,6 @@
 package com.captivepet.sweardle.ui.main;
 
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -10,8 +11,10 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.service.quicksettings.Tile;
 import android.util.Size;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -21,6 +24,9 @@ import android.widget.Button;
 import com.captivepet.sweardle.CustomImageButton;
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Locale;
 
 /**
@@ -28,12 +34,19 @@ import java.util.Locale;
  */
 public class KeyboardFragment extends Fragment {
 
+    private MainViewModel mGameFragment;
     private MainViewModel mViewModel;
     private ConstraintLayout mLayout;
     private int keyHeight;
     private int keyWidth;
     private int keyMargin;
     private View[] key;
+    public static final char[] KEY_LABEL = new char[]{'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
+            'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
+            '↵', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '←'};
+    public static final char BLANK = ' ';
+
+    private boolean LIVE_DATA_FLAG = false;
 
     public KeyboardFragment() {
         // Required empty public constructor ??
@@ -55,11 +68,20 @@ public class KeyboardFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        mViewModel.getSignal().observe(getViewLifecycleOwner(), item -> {
-            updateKeys();
+        mViewModel.getKeyboardSignal().observe(getViewLifecycleOwner(), item -> {
+            updateKeyboard();
         });
 
         mLayout = (ConstraintLayout) view;
+    }
+
+    public static int keyLookup(char c) {
+        for (int ix = 0; ix < KEY_LABEL.length; ix++) {
+            if (KEY_LABEL[ix] == c) {
+                return ix;
+            }
+        }
+        return BLANK;
     }
 
     public int init(Size s) {
@@ -84,23 +106,23 @@ public class KeyboardFragment extends Fragment {
         }
         keyMargin = 2;
         // make the keys
-        char[] keyLabel = MainViewModel.KEY_LABEL;
-        key = new View[keyLabel.length];
+        key = new View[KEY_LABEL.length];
         for (int ix = 0; ix < 28; ix++) {
             View k;
-            if (keyLabel[ix] == MainViewModel.ENTER) {
-                k = new CustomImageButton(mLayout.getContext(), keyLabel[ix]);
+            if (KEY_LABEL[ix] == MainViewModel.ENTER) {
+                k = new CustomImageButton(mLayout.getContext(), KEY_LABEL[ix]);
                 CustomImageButton kcb = (CustomImageButton) k;
                 kcb.setImageResource(R.drawable.ic_baseline_keyboard_return_24);
-            } else if (keyLabel[ix] == MainViewModel.DEL) {
-                k = new CustomImageButton(mLayout.getContext(), keyLabel[ix]);
+            } else if (KEY_LABEL[ix] == MainViewModel.DEL) {
+                k = new CustomImageButton(mLayout.getContext(), KEY_LABEL[ix]);
                 CustomImageButton kcb = (CustomImageButton) k;
                 kcb.setImageResource(R.drawable.ic_baseline_undo_24);
             } else {
                 k = new Button(mLayout.getContext());
                 ((Button) k).setMaxLines(1);
                 ((Button) k).setGravity(Gravity.CENTER);
-                ((Button) k).setText(String.format(Locale.US, "%c", keyLabel[ix]));
+                ((Button) k).setText(String.format(Locale.US, "%c", KEY_LABEL[ix]));
+                k.setTag(TilePair.UNCHECKED);
             }
             k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
             mLayout.addView(k);
@@ -120,9 +142,9 @@ public class KeyboardFragment extends Fragment {
             View k = key[ix];
             int id = k.getId();
             // set key widths & text
-            if (keyLabel[ix] == MainViewModel.ENTER) {
+            if (KEY_LABEL[ix] == MainViewModel.ENTER) {
                 set.constrainWidth(id, (int) (1.5f * keyWidth));
-            } else if (keyLabel[ix] == MainViewModel.DEL)  {
+            } else if (KEY_LABEL[ix] == MainViewModel.DEL)  {
                 ((CustomImageButton) k).setImageResource(R.drawable.ic_baseline_undo_24);
                 set.constrainWidth(id, (int) (1.5f * keyWidth));
             } else {
@@ -194,18 +216,31 @@ public class KeyboardFragment extends Fragment {
         return(gameboardHeight);
     }
 
-    private void updateKeys() {
-        for (int ix = 0; ix < key.length; ix++) {
-            for (TilePair t : mViewModel.getCurrentRow()) {
-                Button k;
-                if (key[ix] instanceof Button) {
-                    k = (Button) key[ix];
-                    if (k.getText().charAt(0) == t.getC()) {
-                        k.setBackground(AppCompatResources.getDrawable(requireContext(), t.getD()));
-                        break;
-                    }
+    public void setLIVE_DATA_FLAG(boolean LIVE_DATA_FLAG) {
+        this.LIVE_DATA_FLAG = LIVE_DATA_FLAG;
+    }
+
+    private void updateKeyboard() {
+        for (TilePair t : mViewModel.getCurrentRow()) {
+            View k = key[keyLookup(t.getC())];
+            int d = (int) k.getTag();
+            int newTag = TilePair.UNCHECKED;
+            if (t.getD() == TilePair.CORRECT) {
+                newTag = TilePair.CORRECT;
+            } else if (t.getD() == TilePair.MISPLACED) {
+                if (d != TilePair.CORRECT) {
+                    newTag = TilePair.MISPLACED;
+                }
+            } else if (t.getD() == TilePair.INCORRECT) {
+                if (d == TilePair.UNCHECKED) {
+                    newTag = TilePair.INCORRECT;
                 }
             }
+            if (newTag != d) {
+                k.setBackground(AppCompatResources.getDrawable(requireContext(), newTag));
+                k.setTag(newTag);
+            }
         }
+        setLIVE_DATA_FLAG(false);
     }
 }
