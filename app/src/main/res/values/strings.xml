@@ -4,4 +4,9 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="key_enter">ENTER</string>
     <string name="key_del">DEL</string>
+    <string name="new_game">New Game</string>
+    <string name="cancel">Cancel</string>
+    <string name="game_over">Game over, Man!</string>
+    <string name="congratulations">You won!</string>
+    <string name="taunt">You lost. The answer was %s</string>
 </resources>

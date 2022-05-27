@@ -2,15 +2,19 @@ package com.captivepet.sweardle;
 
 import android.content.Context;
 import androidx.appcompat.widget.AppCompatImageButton;
-
-import java.util.Locale;
+import com.captivepet.sweardle.ui.main.GameFragment;
 
 public class CustomImageButton extends AppCompatImageButton {
     String text;
 
+    public CustomImageButton(Context context) {
+        super(context);
+        this.setText(String.valueOf(GameFragment.EMPTY));
+    }
+
     public CustomImageButton(Context context, char c) {
         super(context);
-        this.setText(String.format(Locale.US, "%c", c));
+        this.setText(String.valueOf(c));
     }
 
     public String getText() {

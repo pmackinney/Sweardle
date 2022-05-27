@@ -1,5 +1,4 @@
 package com.captivepet.sweardle;
-import com.captivepet.sweardle.R;
 
 // https://alvinalexander.com/java/java-tuple-classes/
 public class TilePair {
@@ -17,10 +16,6 @@ public class TilePair {
 
     public char getC() {
         return c;
-    }
-
-    public void setC(char c) {
-        this.c = c;
     }
 
     public int getD() {

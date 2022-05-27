@@ -1,9 +1,7 @@
 package com.captivepet.sweardle.ui.main;
 
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -11,10 +9,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
-
-import android.service.quicksettings.Tile;
 import android.util.Size;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -24,9 +19,6 @@ import android.widget.Button;
 import com.captivepet.sweardle.CustomImageButton;
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
-
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Locale;
 
 /**
@@ -34,7 +26,6 @@ import java.util.Locale;
  */
 public class KeyboardFragment extends Fragment {
 
-    private MainViewModel mGameFragment;
     private MainViewModel mViewModel;
     private ConstraintLayout mLayout;
     private int keyHeight;
@@ -45,8 +36,6 @@ public class KeyboardFragment extends Fragment {
             'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
             '↵', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '←'};
     public static final char BLANK = ' ';
-
-    private boolean LIVE_DATA_FLAG = false;
 
     public KeyboardFragment() {
         // Required empty public constructor ??
@@ -68,8 +57,8 @@ public class KeyboardFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        mViewModel.getKeyboardSignal().observe(getViewLifecycleOwner(), item -> {
-            updateKeyboard();
+        mViewModel.getKeyboardSignal().observe(getViewLifecycleOwner(), signal -> {
+            updateKeyboard(signal);
         });
 
         mLayout = (ConstraintLayout) view;
@@ -87,24 +76,27 @@ public class KeyboardFragment extends Fragment {
     public int init(Size s) {
         int mWidth = s.getWidth();
         int mHeight = s.getHeight();
-        int keyboardWidth, keyboardHeight, gameboardHeight;
+        int keyboardHeight, gameboardHeight;
         int PORTRAIT = 0;
         int LANDSCAPE = 1;
         int keyboardOrientation;
         if (mHeight > mWidth) {
+            /* Yes, I'm conflicted about how to assign sizes */
             keyboardOrientation = PORTRAIT;
-            keyboardWidth = mWidth;
+            keyWidth = mWidth / 11;
+            keyMargin = (mWidth - 10 * keyWidth) / 22;
+            //keyWidth = (mWidth - 4 * keyMargin) / 10;
             // total height of kb is at least 1/3 of screen
-            keyboardHeight = Math.max((int)(mHeight * 0.333f), keyboardWidth / 4 + keyMargin * 3);
-            keyWidth = (mWidth - 4 * keyMargin) / 10;
-            keyHeight = Math.min((keyboardHeight - keyMargin * 3) / 3, (3 * keyWidth) / 2);
+            //  keyboardHeight = Math.min((int)(mHeight * 0.333f), keyboardWidth / 4 + keyMargin * 3);
+            keyboardHeight = keyWidth * 6;
+            //  keyHeight = Math.min((keyboardHeight - keyMargin * 3) / 3, (3 * keyWidth) / 2);
+            keyHeight = (int)(1.2f * keyWidth);
             gameboardHeight = Math.min(mWidth, mHeight - keyboardHeight);
         } else {
             gameboardHeight = mHeight;
-            keyboardWidth = mWidth / 2;
-            keyboardOrientation = LANDSCAPE; //TODO
+//            keyboardWidth = mWidth / 2;
+//            keyboardOrientation = LANDSCAPE; //TODO
         }
-        keyMargin = 2;
         // make the keys
         key = new View[KEY_LABEL.length];
         for (int ix = 0; ix < 28; ix++) {
@@ -128,11 +120,21 @@ public class KeyboardFragment extends Fragment {
             mLayout.addView(k);
             k.setId(View.generateViewId());
             k.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mViewModel.onClick(view);
-                }
-            });
+                    @Override
+                    public void onClick(View view) {
+                        mViewModel.onClick(view);
+                    }
+                });
+            if (KEY_LABEL[ix] == MainViewModel.DEL) {
+                k.setTag("wide");
+                k.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        toggleKeyBoardWidth(view);
+                        return false;
+                    }
+                });
+            }
             key[ix] = k;
         }
         // position the keys
@@ -154,17 +156,17 @@ public class KeyboardFragment extends Fragment {
             int top, left, right, bottom, topS, leftS, rightS, bottomS, topM, leftM, rightM, bottomM;
             // top & bottom constraints
             if (ix == 0) {
-                set.setVerticalChainStyle(id, ConstraintSet.CHAIN_PACKED);
+                set.setVerticalChainStyle(id, ConstraintSet.CHAIN_SPREAD);
                 top = ConstraintSet.PARENT_ID;
                 topS = ConstraintSet.TOP;
-                topM = keyHeight / 4;
+                topM = keyHeight / 2;
                 bottom = key[10].getId();
                 bottomS = ConstraintSet.TOP;
                 bottomM = keyMargin;
             } else if (ix == 10) {
                 top = key[0].getId();
                 topS = ConstraintSet.BOTTOM;
-                topM = 0;
+                topM = keyMargin;
                 bottom = key[19].getId();
                 bottomS = ConstraintSet.TOP;
                 bottomM = keyMargin;
@@ -174,11 +176,11 @@ public class KeyboardFragment extends Fragment {
                 topM = keyMargin;
                 bottom = ConstraintSet.PARENT_ID;
                 bottomS = ConstraintSet.BOTTOM;
-                bottomM = keyHeight / 4;
+                bottomM = keyHeight / 2;
             } else {
                 top =  key[ix - 1].getId();
                 topS = ConstraintSet.TOP;
-                topM = 0;
+                topM = keyMargin;
                 bottom = key[ix - 1].getId();
                 bottomS = ConstraintSet.BOTTOM;
                 bottomM = keyMargin;
@@ -188,21 +190,21 @@ public class KeyboardFragment extends Fragment {
                 set.setHorizontalChainStyle(id, ConstraintSet.CHAIN_PACKED);
                 left = ConstraintSet.PARENT_ID;
                 leftS = ConstraintSet.LEFT;
-                leftM = 0;
+                leftM = keyMargin;
                 right = key[ix + 1].getId();
                 rightS = ConstraintSet.LEFT;
                 rightM = keyMargin;
             } else if (ix == 9 || ix == 18 || ix == 27) {
                 left = key[ix - 1].getId();
                 leftS = ConstraintSet.RIGHT;
-                leftM = 0;
+                leftM = keyMargin;
                 right = ConstraintSet.PARENT_ID;
                 rightS = ConstraintSet.RIGHT;
-                rightM = 0;
+                rightM = keyMargin;
             } else {
                 left = key[ix - 1].getId();
                 leftS = ConstraintSet.RIGHT;
-                leftM = 0;
+                leftM = keyMargin;
                 right = key[ix + 1].getId();
                 rightS = ConstraintSet.LEFT;
                 rightM = keyMargin;
@@ -216,31 +218,50 @@ public class KeyboardFragment extends Fragment {
         return(gameboardHeight);
     }
 
-    public void setLIVE_DATA_FLAG(boolean LIVE_DATA_FLAG) {
-        this.LIVE_DATA_FLAG = LIVE_DATA_FLAG;
+
+    public void toggleKeyBoardWidth(View view) {
+        ConstraintSet set = new ConstraintSet();
+        set.clone(mLayout);
+        if (key[27].getTag().toString().equals("spread")) {
+            set.setHorizontalChainStyle(key[0].getId(), ConstraintSet.CHAIN_SPREAD);
+            set.setHorizontalChainStyle(key[10].getId(), ConstraintSet.CHAIN_SPREAD);
+            set.setHorizontalChainStyle(key[19].getId(), ConstraintSet.CHAIN_SPREAD);
+            key[27].setTag("packed");
+        } else {
+            set.setHorizontalChainStyle(key[0].getId(), ConstraintSet.CHAIN_PACKED);
+            set.setHorizontalChainStyle(key[10].getId(), ConstraintSet.CHAIN_PACKED);
+            set.setHorizontalChainStyle(key[19].getId(), ConstraintSet.CHAIN_PACKED);
+            key[27].setTag("spread");
+        }
+        set.applyTo(mLayout);
     }
 
-    private void updateKeyboard() {
-        for (TilePair t : mViewModel.getCurrentRow()) {
-            View k = key[keyLookup(t.getC())];
-            int d = (int) k.getTag();
-            int newTag = TilePair.UNCHECKED;
-            if (t.getD() == TilePair.CORRECT) {
-                newTag = TilePair.CORRECT;
-            } else if (t.getD() == TilePair.MISPLACED) {
-                if (d != TilePair.CORRECT) {
-                    newTag = TilePair.MISPLACED;
-                }
-            } else if (t.getD() == TilePair.INCORRECT) {
-                if (d == TilePair.UNCHECKED) {
-                    newTag = TilePair.INCORRECT;
-                }
+    private void updateKeyboard(String signal) {
+        if (signal.equals((GameFragment.RESET_KEYS))) {
+            for (View k : key) {
+                k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
             }
-            if (newTag != d) {
-                k.setBackground(AppCompatResources.getDrawable(requireContext(), newTag));
-                k.setTag(newTag);
+        } else {
+            for (TilePair t : mViewModel.getCurrentRow()) {
+                View k = key[keyLookup(t.getC())];
+                int d = (int) k.getTag();
+                int newTag = TilePair.UNCHECKED;
+                if (t.getD() == TilePair.CORRECT) {
+                    newTag = TilePair.CORRECT;
+                } else if (t.getD() == TilePair.MISPLACED) {
+                    if (d != TilePair.CORRECT) {
+                        newTag = TilePair.MISPLACED;
+                    }
+                } else if (t.getD() == TilePair.INCORRECT) {
+                    if (d == TilePair.UNCHECKED) {
+                        newTag = TilePair.INCORRECT;
+                    }
+                }
+                if (newTag != d) {
+                    k.setBackground(AppCompatResources.getDrawable(requireContext(), newTag));
+                    k.setTag(newTag);
+                }
             }
         }
-        setLIVE_DATA_FLAG(false);
     }
 }

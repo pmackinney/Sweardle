@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -36,11 +37,11 @@ public class GameFragment extends Fragment {
     public static final String READY = "Ready";
     public static final String WINNER = "Winner";
     public static final String ROW_UPDATED = "ready for keyboard update";
-    public static final String KEYS_UPDATED = "ready for next row";
+    public static final String RESET_KEYS = "Set all keys to UNTESTED";
     public boolean rowUpdated;
     public final static int ROW_COUNT = 6;
     public final static int WORD_LENGTH = 5;
-    final static char EMPTY = ' ';
+    public final static char EMPTY = ' ';
 
     final Button[] tile = new Button[ROW_COUNT * WORD_LENGTH];
     final int TILE_MARGIN = 1;
@@ -48,7 +49,6 @@ public class GameFragment extends Fragment {
     public static GameFragment newInstance() {
         return new GameFragment();
     }
-    AlertDialog.Builder builder;
 
     @Nullable
     @Override
@@ -60,18 +60,16 @@ public class GameFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mLayout = (ConstraintLayout) view.findViewById(fragment_game);
+        mLayout = view.findViewById(fragment_game);
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        mViewModel.getGameSignal().observe(getViewLifecycleOwner(), item -> {
-            updateRow(item);
-        });
+        mViewModel.getGameSignal().observe(getViewLifecycleOwner(), this::updateRow);
 
         View parent = (View) mLayout.getParent();
         parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                mViewModel.init(getResources().getStringArray(R.array.words));
+                mViewModel.newGame();
             }
         });
     }
@@ -96,13 +94,15 @@ public class GameFragment extends Fragment {
         if (row.size() < WORD_LENGTH) { // handle backspace
             setTile(startOfRow + nextChar, EMPTY, AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
         }
-        if (WINNER.equals(signal) || mViewModel.getRowsDone() == ROW_COUNT) {
-            newGameQuery();
+        if (mViewModel.getWinner()) {
+            newGameQuery(getString(R.string.congratulations));
+        } else if (mViewModel.getRowsDone() == ROW_COUNT) {
+            newGameQuery(String.format(getString(R.string.taunt), mViewModel.getGameWord()));
         }
     }
 
     public void init(int height) {
-        tileWidth = (int) (height / (WORD_LENGTH + 1));
+        tileWidth = height / (WORD_LENGTH + 1);
         // make all the tiles;
         for (int ix = 0; ix < ROW_COUNT * WORD_LENGTH; ix++) {
             Button k = new Button(mLayout.getContext());
@@ -114,7 +114,6 @@ public class GameFragment extends Fragment {
         ConstraintSet set = new ConstraintSet();
         set.clone(mLayout);
         for (int ix = 0; ix < ROW_COUNT * WORD_LENGTH; ix++) {
-            setTile(ix, ' ', AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
             Button k = tile[ix];
             k.setEnabled(false);
 
@@ -186,7 +185,15 @@ public class GameFragment extends Fragment {
             set.connect(id, ConstraintSet.RIGHT, right, rightS, rightM);
         }
         set.applyTo(mLayout);
+        newGame();
+    }
+
+    public void newGame() {
+        for (int ix = 0; ix < tile.length; ix++) {
+            setTile(ix, ' ', AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
+        }
         rowUpdated = false;
+        mViewModel.newGame();
     }
 
     public void setTile(int ix, char c, Drawable d) {
@@ -195,34 +202,31 @@ public class GameFragment extends Fragment {
         rowUpdated = false;
     }
 
-    private String newGameMessage() {
-        return "Play a new game?";
-    }
-
     // https://www.javatpoint.com/android-alert-dialog-example
-    private void newGameQuery() {
-        builder = new AlertDialog.Builder(getContext());
-        builder.setMessage(newGameMessage()).setTitle("Game Over man").setCancelable(false)
-            .setPositiveButton("New Game", new DialogInterface.OnClickListener() {
+    private void newGameQuery(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(getString(R.string.game_over));
+        builder.setMessage(message);
+        builder.setPositiveButton(getString(R.string.new_game),
+                new DialogInterface.OnClickListener() {
+                @Override
                 public void onClick(DialogInterface dialog, int id) {
-//                        finish();
-                    Toast.makeText(requireContext().getApplicationContext(),"you choose New Game",
-                            Toast.LENGTH_SHORT).show();
-                }
-            })
-            .setNegativeButton("Quit", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    //  Action for 'NO' Button
-                    dialog.cancel();
-                    Toast.makeText(requireContext().getApplicationContext(),"you choose Quit",
-                            Toast.LENGTH_SHORT).show();
+                    newGame();
                 }
             });
-        //Creating dialog box
-        AlertDialog alert = builder.create();
-        //Setting the title manually
-//        alert.setTitle("AlertDialogExample");
-        alert.show();
+        builder.setNegativeButton(getString(R.string.cancel),
+                new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.dismiss();
+                }
+            });
+        AlertDialog dialog = builder.create();
+//        dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+        WindowManager.LayoutParams p = dialog.getWindow().getAttributes();
+        p.gravity = Gravity.BOTTOM;
+        p.verticalMargin = 20;
+        dialog.show();
     }
 
     // https://www.javatpoint.com/android-alert-dialog-example

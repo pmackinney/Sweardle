@@ -1,65 +1,63 @@
 package com.captivepet.sweardle.ui.main;
 
-import android.util.Log;
+import android.app.Application;
 import android.view.View;
 import android.widget.Button;
-
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
-
-import java.security.Key;
 import java.util.ArrayList;
-import java.util.Locale;
-
 import com.captivepet.sweardle.CustomImageButton;
 import com.captivepet.sweardle.TilePair;
+import com.captivepet.sweardle.R;
 
-public class MainViewModel extends ViewModel {
-
-    private static final String TAG = "SWEARBUG";
-
+public class MainViewModel extends AndroidViewModel {
     final static int ENTER = '↵';
     final static int DEL = '←';
     private MutableLiveData<String> keyboardSignal;
-    public MutableLiveData<String> getKeyboardSignal() {
-        if (keyboardSignal == null) {
-            keyboardSignal = new MutableLiveData<String>();
-        }
-        return keyboardSignal;
-    }
-private MutableLiveData<String> gameSignal;
-    public MutableLiveData<String> getGameSignal() {
-        if (gameSignal == null) {
-            gameSignal = new MutableLiveData<String>();
-        }
-        return gameSignal;
-    }
+    private MutableLiveData<String> gameSignal;
     private String gameWord;
     private int rowsDone = 0;
     private boolean TESTED = false;
-    public boolean getTESTED () {
+    public boolean getTESTED() {
         return TESTED;
     }
-    public void setTESTED (boolean b) {
-        TESTED = b;
-    }
     private boolean WINNER = false;
+    public boolean getWinner() { return WINNER; }
     final private ArrayList<TilePair> currentRow = new ArrayList<>();
     public ArrayList<TilePair> getCurrentRow() { return currentRow; }
-    public void clearCurrentRow() { currentRow.clear(); }
-    private String[] dict;
-
-    private String getWord() {
+    private final String[] dict;
+    private final String[] words;
+    public String getGameWord() {
         return gameWord;
     }
 
-    public void setGameWord(String gameWord) {
-        this.gameWord = gameWord;
+    public MainViewModel(@NonNull Application application) {
+        super(application);
+        this.dict = getApplication().getResources().getStringArray(R.array.dict);
+        this.words = getApplication().getResources().getStringArray(R.array.words);
     }
 
-    void init(String[] dict) {
-        this.dict = dict;
-        gameWord = dict[(int) (Math.random() * dict.length)];
+    public MutableLiveData<String> getKeyboardSignal() {
+        if (keyboardSignal == null) {
+            keyboardSignal = new MutableLiveData<>();
+        }
+        return keyboardSignal;
+    }
+
+    public MutableLiveData<String> getGameSignal() {
+        if (gameSignal == null) {
+            gameSignal = new MutableLiveData<>();
+        }
+        return gameSignal;
+    }
+
+    public void newGame() {
+        keyboardSignal.setValue(GameFragment.RESET_KEYS);
+        gameWord = words[(int) (Math.random() * words.length)];
+        WINNER = false;
+        currentRow.clear();
+        rowsDone = 0;
     }
 
     public void onClick(View view) {
@@ -73,7 +71,6 @@ private MutableLiveData<String> gameSignal;
         } else {
             keyChar = ((Button) view).getText().charAt(0);
         }
-        Log.d(TAG, String.format(Locale.US, "keytap: %c", keyChar));
         if (keyChar == ENTER && !TESTED && position == GameFragment.WORD_LENGTH) {
             if (validateGuess()) {
                 WINNER = testWord();
@@ -136,7 +133,7 @@ private MutableLiveData<String> gameSignal;
         for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) { // find misplaced
             for (int jx = 0; jx < GameFragment.WORD_LENGTH; jx++) {
                 if (word[ix] == GameFragment.EMPTY) {
-                    continue; // already matched
+                    continue; // noop if already matched
                 } else if (word[ix] == guess[jx].getC() && guess[jx].getD() == TilePair.UNCHECKED) {
                     guess[jx].setD(TilePair.MISPLACED);
                     WIN = false;
