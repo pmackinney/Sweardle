@@ -28,9 +28,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onGlobalLayout() {
                 parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                windowSize = new Size(container.getMeasuredWidth(), container.getMeasuredHeight());
-                int tileSize = keyboard.init(windowSize);
-                tile.init(tileSize);
+                int tileSize = keyboard.init();
+                //tile.init(tileSize);
             }
         });
 

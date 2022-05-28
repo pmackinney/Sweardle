@@ -60,7 +60,7 @@ public class MainViewModel extends AndroidViewModel {
         rowsDone = 0;
     }
 
-    public void onClick(View view) {
+    public void onKeyClick(View view) {
         if (WINNER) {
             return;
         }
