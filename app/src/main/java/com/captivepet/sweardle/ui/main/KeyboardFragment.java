@@ -1,5 +1,7 @@
 package com.captivepet.sweardle.ui.main;
 
+import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -10,13 +12,14 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import android.util.Size;
+
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import com.captivepet.sweardle.CustomImageButton;
+import android.widget.ImageButton;
+
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
 import java.util.Locale;
@@ -28,22 +31,31 @@ public class KeyboardFragment extends Fragment {
 
     private MainViewModel mViewModel;
     private ConstraintLayout mLayout;
+    private float keyboardWeight;
     private int keyHeight;
     private int keyWidth;
     private int keyMargin;
-    private View[] key;
-    public static final char[] KEY_LABEL = new char[]{'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
+    float newTotalWeight;
+    float newKeyboardWeight;
+    private final int KEY_WIDTH_DIVISOR = 12; // How many keys wide is the full KB width?
+    private final int KEY_MARGIN_DIVISOR = 12; // How many margins = 1 key?
+    private final float MAX_KEY_HEIGHT_RATIO = 1.5f; // Max keyHeight relative to keyWidth
+
+    public static final char[] KEY_LABEL = new char[]{
+            'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
             'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
-            '↵', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '←'};
+            'Z', 'X', 'C', 'V', 'B', 'N', 'M'};
     public static final char BLANK = ' ';
+//    public static final char ENTER = '⏎';
+//    public static final char DEL = '⌫';
+    public static char ENTER;
+    public static char DEL;
+    private static final Button[] key = new Button[KEY_LABEL.length];
+    private ImageButton enterButton;
+    private ImageButton delButton;
 
-    public KeyboardFragment() {
-        // Required empty public constructor ??
-    }
-
-    public static KeyboardFragment newInstance() {
-        return new KeyboardFragment();
-    }
+    public KeyboardFragment() {} // Required empty public constructor ??
+    public static KeyboardFragment newInstance() { return new KeyboardFragment(); }
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     @Nullable
@@ -56,104 +68,83 @@ public class KeyboardFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mLayout = view.findViewById(R.id.fragment_keyboard);
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        mViewModel.getKeyboardSignal().observe(getViewLifecycleOwner(), signal -> {
-            updateKeyboard(signal);
-        });
-
-        mLayout = (ConstraintLayout) view;
+        mViewModel.getKeyboardSignal().observe(getViewLifecycleOwner(), this::updateKeyboard);
     }
 
-    public static int keyLookup(char c) {
-        for (int ix = 0; ix < KEY_LABEL.length; ix++) {
-            if (KEY_LABEL[ix] == c) {
-                return ix;
-            }
-        }
-        return BLANK;
-    }
-
-    public int init(Size s) {
-        int mWidth = s.getWidth();
-        int mHeight = s.getHeight();
-        int keyboardHeight, gameboardHeight;
+    public int computeSizes(Point size) {
+        int keyboardHeight, keyboardWidth, gameboardSize;
         int PORTRAIT = 0;
         int LANDSCAPE = 1;
         int keyboardOrientation;
-        if (mHeight > mWidth) {
-            /* Yes, I'm conflicted about how to assign sizes */
-            keyboardOrientation = PORTRAIT;
-            keyWidth = mWidth / 11;
-            keyMargin = (mWidth - 10 * keyWidth) / 22;
-            //keyWidth = (mWidth - 4 * keyMargin) / 10;
-            // total height of kb is at least 1/3 of screen
-            //  keyboardHeight = Math.min((int)(mHeight * 0.333f), keyboardWidth / 4 + keyMargin * 3);
-            keyboardHeight = keyWidth * 6;
-            //  keyHeight = Math.min((keyboardHeight - keyMargin * 3) / 3, (3 * keyWidth) / 2);
-            keyHeight = (int)(1.2f * keyWidth);
-            gameboardHeight = Math.min(mWidth, mHeight - keyboardHeight);
-        } else {
-            gameboardHeight = mHeight;
-//            keyboardWidth = mWidth / 2;
-//            keyboardOrientation = LANDSCAPE; //TODO
+        if (size.y >= size.x) { // portrait
+            keyboardWidth = size.x;
+            keyWidth = keyboardWidth / KEY_WIDTH_DIVISOR;
+            keyMargin = keyWidth / KEY_MARGIN_DIVISOR;
+            keyboardHeight = Math.max(size.y - size.x, 4 * keyWidth);
+            keyHeight = Math.min(keyboardHeight / 4, (int) (MAX_KEY_HEIGHT_RATIO * keyWidth));
+//            keyboardWeight = (float) keyboardHeight / size.y;
+            gameboardSize = size.y - keyboardHeight;
+        } else { // landscape
+            gameboardSize = (int) Math.min(size.x - size.y, size.x / 2f);
+            keyboardWeight = size.x - (gameboardSize / size.x);
+//            gameboardSize += 1 - keyboardWeight;
+            keyboardWidth = size.x - (int) gameboardSize;
+            keyWidth = keyboardWidth / KEY_WIDTH_DIVISOR;
+            keyMargin = 1;
+            keyHeight = (int) (MAX_KEY_HEIGHT_RATIO * keyWidth);
         }
+//        newTotalWeight = 0.5f / (1 - keyboardWeight);
+//        newKeyboardWeight = keyboardWeight * newTotalWeight;
+        return gameboardSize;
+    }
+
+    public float getNewTotalWeight() {
+        return newTotalWeight;
+    }
+    public float getNewKeyboardWeight() {
+        return newKeyboardWeight;
+    }
+    public void init() {
         // make the keys
-        key = new View[KEY_LABEL.length];
-        for (int ix = 0; ix < 28; ix++) {
-            View k;
-            if (KEY_LABEL[ix] == MainViewModel.ENTER) {
-                k = new CustomImageButton(mLayout.getContext(), KEY_LABEL[ix]);
-                CustomImageButton kcb = (CustomImageButton) k;
-                kcb.setImageResource(R.drawable.ic_baseline_keyboard_return_24);
-            } else if (KEY_LABEL[ix] == MainViewModel.DEL) {
-                k = new CustomImageButton(mLayout.getContext(), KEY_LABEL[ix]);
-                CustomImageButton kcb = (CustomImageButton) k;
-                kcb.setImageResource(R.drawable.ic_baseline_undo_24);
-            } else {
-                k = new Button(mLayout.getContext());
-                ((Button) k).setMaxLines(1);
-                ((Button) k).setGravity(Gravity.CENTER);
-                ((Button) k).setText(String.format(Locale.US, "%c", KEY_LABEL[ix]));
-                k.setTag(TilePair.UNCHECKED);
-            }
+        ENTER = getString(R.string.enter_symbol).charAt(0);
+        enterButton = new ImageButton(getContext());
+        enterButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
+        enterButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_keyboard_return_24));
+        enterButton.setTag(getString(R.string.enter_symbol));
+        setCommonProperties(enterButton);
+
+        DEL = getString(R.string.del_symbol).charAt(0);
+        delButton = new ImageButton(getContext());
+        delButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
+        delButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_undo_24));
+        delButton.setTag(getString(R.string.del_symbol));
+        setCommonProperties(delButton);
+
+        for (int ix = 0; ix < key.length; ix++) {
+            Button k;
+            k = new Button(mLayout.getContext());
+            setCommonProperties(k);
+            k.setMaxLines(1);
+            k.setGravity(Gravity.CENTER);
+            k.setText(String.format(Locale.US, "%c", KEY_LABEL[ix]));
+            k.setTag(TilePair.UNCHECKED);
             k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
-            mLayout.addView(k);
-            k.setId(View.generateViewId());
-            k.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        mViewModel.onClick(view);
-                    }
-                });
-            if (KEY_LABEL[ix] == MainViewModel.DEL) {
-                k.setTag("wide");
-                k.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View view) {
-                        toggleKeyBoardWidth(view);
-                        return false;
-                    }
-                });
-            }
-            key[ix] = k;
+            key[ix] = (Button) k;
         }
-        // position the keys
+
+        // label & position the keys
         ConstraintSet set = new ConstraintSet();
         set.clone(mLayout);
-        for (int ix = 0; ix < 28; ix++) {
+        for (int ix = 0; ix < key.length; ix++) {
             View k = key[ix];
             int id = k.getId();
             // set key widths & text
-            if (KEY_LABEL[ix] == MainViewModel.ENTER) {
-                set.constrainWidth(id, (int) (1.5f * keyWidth));
-            } else if (KEY_LABEL[ix] == MainViewModel.DEL)  {
-                ((CustomImageButton) k).setImageResource(R.drawable.ic_baseline_undo_24);
-                set.constrainWidth(id, (int) (1.5f * keyWidth));
-            } else {
-                set.constrainWidth(id, keyWidth);
-            }
+            set.constrainWidth(id, keyWidth);
             set.constrainHeight(id, keyHeight);
             int top, left, right, bottom, topS, leftS, rightS, bottomS, topM, leftM, rightM, bottomM;
+
             // top & bottom constraints
             if (ix == 0) {
                 set.setVerticalChainStyle(id, ConstraintSet.CHAIN_SPREAD);
@@ -178,29 +169,42 @@ public class KeyboardFragment extends Fragment {
                 bottomS = ConstraintSet.BOTTOM;
                 bottomM = keyHeight / 2;
             } else {
-                top =  key[ix - 1].getId();
+                top = key[ix - 1].getId();
                 topS = ConstraintSet.TOP;
-                topM = keyMargin;
+                topM = 0;
                 bottom = key[ix - 1].getId();
                 bottomS = ConstraintSet.BOTTOM;
-                bottomM = keyMargin;
+                bottomM = 0;
             }
             // left & right constraints
-            if (ix == 0 || ix == 10 || ix == 19) {
-                set.setHorizontalChainStyle(id, ConstraintSet.CHAIN_PACKED);
-                left = ConstraintSet.PARENT_ID;
-                leftS = ConstraintSet.LEFT;
-                leftM = keyMargin;
+            if (ix == 0 || ix == 10 || ix == 19){
+
+                if (ix == 19) {
+                    left = enterButton.getId();
+                    leftS = ConstraintSet.RIGHT;
+                    leftM = keyMargin;
+                } else {
+                    set.setHorizontalChainStyle(id, ConstraintSet.CHAIN_PACKED);
+                    left = ConstraintSet.PARENT_ID;
+                    leftS = ConstraintSet.LEFT;
+                    leftM = keyMargin;
+                }
                 right = key[ix + 1].getId();
                 rightS = ConstraintSet.LEFT;
                 rightM = keyMargin;
-            } else if (ix == 9 || ix == 18 || ix == 27) {
+            } else if (ix == 9 || ix == 18 || ix == 25) {
                 left = key[ix - 1].getId();
                 leftS = ConstraintSet.RIGHT;
                 leftM = keyMargin;
-                right = ConstraintSet.PARENT_ID;
-                rightS = ConstraintSet.RIGHT;
-                rightM = keyMargin;
+                if (ix == 25) {
+                    right = delButton.getId();
+                    rightS = ConstraintSet.LEFT;
+                    rightM = keyMargin;
+                } else {
+                    right = ConstraintSet.PARENT_ID;
+                    rightS = ConstraintSet.RIGHT;
+                    rightM = keyMargin;
+                }
             } else {
                 left = key[ix - 1].getId();
                 leftS = ConstraintSet.RIGHT;
@@ -214,54 +218,108 @@ public class KeyboardFragment extends Fragment {
             set.connect(id, ConstraintSet.LEFT, left, leftS, leftM);
             set.connect(id, ConstraintSet.RIGHT, right, rightS, rightM);
         }
+        set.connect(enterButton.getId(), ConstraintSet.TOP, key[19].getId(), ConstraintSet.TOP, 0);
+        set.connect(enterButton.getId(), ConstraintSet.BOTTOM, key[19].getId(), ConstraintSet.BOTTOM, 0);
+        set.connect(enterButton.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT, keyMargin);
+        set.connect(enterButton.getId(), ConstraintSet.RIGHT, key[19].getId(), ConstraintSet.LEFT, keyMargin);
+        set.setHorizontalChainStyle(enterButton.getId(), ConstraintSet.CHAIN_PACKED);
+        set.connect(delButton.getId(), ConstraintSet.TOP, key[25].getId(), ConstraintSet.TOP, 0);
+        set.connect(delButton.getId(), ConstraintSet.BOTTOM, key[25].getId(), ConstraintSet.BOTTOM, 0);
+        set.connect(delButton.getId(), ConstraintSet.LEFT, key[25].getId(), ConstraintSet.RIGHT, keyMargin);
+        set.connect(delButton.getId(), ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT, keyMargin);
+        set.constrainHeight(enterButton.getId(), keyHeight);
+        set.constrainHeight(delButton.getId(), keyHeight);
+        set.constrainWidth(enterButton.getId(), (int) (1.5f * keyWidth));
+        set.constrainWidth(delButton.getId(), (int) (1.5f * keyWidth));
         set.applyTo(mLayout);
-        return(gameboardHeight);
+
+        // special delButton setup for testing
+        delButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                toggleKeyBoardWidth(view);
+                return false;
+            }
+        });
+        set.applyTo(mLayout);
     }
 
+    public void setCommonProperties(View button) {
+        button.setId(View.generateViewId());
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mViewModel.onKeyboard(view);
+            }
+        });
+        mLayout.addView(button);
+    }
 
+    public static int keyLookup(char c) {
+        for (int ix = 0; ix < KEY_LABEL.length; ix++) {
+            if (KEY_LABEL[ix] == c) {
+                return ix;
+            }
+        }
+        return BLANK;
+    }
+
+    private int toggleState = 0;
     public void toggleKeyBoardWidth(View view) {
         ConstraintSet set = new ConstraintSet();
         set.clone(mLayout);
-        if (key[27].getTag().toString().equals("spread")) {
+        if (toggleState % 3 == 0) {
             set.setHorizontalChainStyle(key[0].getId(), ConstraintSet.CHAIN_SPREAD);
             set.setHorizontalChainStyle(key[10].getId(), ConstraintSet.CHAIN_SPREAD);
-            set.setHorizontalChainStyle(key[19].getId(), ConstraintSet.CHAIN_SPREAD);
-            key[27].setTag("packed");
-        } else {
+            set.setHorizontalChainStyle(enterButton.getId(), ConstraintSet.CHAIN_SPREAD);
+            toggleState++;
+        } else if (toggleState % 3 == 1){
+            set.setHorizontalChainStyle(key[0].getId(), ConstraintSet.CHAIN_SPREAD_INSIDE);
+            set.setHorizontalChainStyle(key[10].getId(), ConstraintSet.CHAIN_SPREAD_INSIDE);
+            set.setHorizontalChainStyle(enterButton.getId(), ConstraintSet.CHAIN_SPREAD_INSIDE);
+            toggleState++;
+        } else if (toggleState % 3 == 2) {
             set.setHorizontalChainStyle(key[0].getId(), ConstraintSet.CHAIN_PACKED);
             set.setHorizontalChainStyle(key[10].getId(), ConstraintSet.CHAIN_PACKED);
-            set.setHorizontalChainStyle(key[19].getId(), ConstraintSet.CHAIN_PACKED);
-            key[27].setTag("spread");
+            set.setHorizontalChainStyle(enterButton.getId(), ConstraintSet.CHAIN_PACKED);
+            toggleState++;
+        } else if (toggleState % 4 == 0) {
+            set.setVerticalChainStyle(key[0].getId(), ConstraintSet.CHAIN_SPREAD);
+            toggleState++;
+        }else if (toggleState % 4 == 1) {
+            set.setVerticalChainStyle(key[0].getId(), ConstraintSet.CHAIN_SPREAD_INSIDE);
+            toggleState++;
+        } else if (toggleState % 4 == 2) {
+            set.setVerticalChainStyle(key[0].getId(), ConstraintSet.CHAIN_PACKED);
         }
         set.applyTo(mLayout);
     }
 
-    private void updateKeyboard(String signal) {
-        if (signal.equals((GameFragment.RESET_KEYS))) {
+    private void updateKeyboard(@NonNull String signal) {
+        if (signal.equals(GameFragment.RESET_KEYS)) {
             for (View k : key) {
                 k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
             }
-        } else {
-            for (TilePair t : mViewModel.getCurrentRow()) {
-                View k = key[keyLookup(t.getC())];
-                int d = (int) k.getTag();
-                int newTag = TilePair.UNCHECKED;
-                if (t.getD() == TilePair.CORRECT) {
-                    newTag = TilePair.CORRECT;
-                } else if (t.getD() == TilePair.MISPLACED) {
-                    if (d != TilePair.CORRECT) {
-                        newTag = TilePair.MISPLACED;
+        } else if (signal.equals(GameFragment.ROW_UPDATED)) {
+            for (TilePair guess : mViewModel.getCurrentRow()) {
+                int guessStatus = guess.getD();
+                Button mKey = key[keyLookup(guess.getC())];
+                int keyStatus = (int) mKey.getTag();
+                if (keyStatus == TilePair.MISPLACED || keyStatus == TilePair.UNCHECKED) {
+                    if (guessStatus == TilePair.CORRECT) {
+                        setKeyStatus(mKey, TilePair.CORRECT);
+                    } else if (guessStatus == TilePair.MISPLACED && keyStatus != TilePair.MISPLACED) {
+                        setKeyStatus(mKey, TilePair.MISPLACED);
+                    } else if (guessStatus == TilePair.INCORRECT && keyStatus != TilePair.INCORRECT) {
+                        setKeyStatus(mKey, TilePair.INCORRECT);
                     }
-                } else if (t.getD() == TilePair.INCORRECT) {
-                    if (d == TilePair.UNCHECKED) {
-                        newTag = TilePair.INCORRECT;
-                    }
-                }
-                if (newTag != d) {
-                    k.setBackground(AppCompatResources.getDrawable(requireContext(), newTag));
-                    k.setTag(newTag);
                 }
             }
         }
+    }
+
+    private void setKeyStatus(Button key, int status) {
+        key.setBackground(AppCompatResources.getDrawable(requireContext(), status));
+        key.setTag(status);
     }
 }

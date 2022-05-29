@@ -2,11 +2,13 @@ package com.captivepet.sweardle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Size;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 
 import com.captivepet.sweardle.ui.main.GameFragment;
 import com.captivepet.sweardle.ui.main.KeyboardFragment;
@@ -28,9 +30,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onGlobalLayout() {
                 parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                windowSize = new Size(container.getMeasuredWidth(), container.getMeasuredHeight());
-                int tileSize = keyboard.init(windowSize);
-                tile.init(tileSize);
+                int gameSize = keyboard.computeSizes(getDisplayContentHeight());
+                keyboard.init();
+                tile.init(gameSize);
             }
         });
 
@@ -42,5 +44,19 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction().replace(
                     R.id.main_fragment, tile).commitNow();
         }
+    }
+
+    // https://gist.github.com/dominicthomas/8257203
+    public Point getDisplayContentHeight() {
+        final WindowManager windowManager = getWindowManager();
+        final Point size = new Point();
+        int screenHeight = 0, actionBarHeight = 0;
+        if (getActionBar() != null) {
+            actionBarHeight = getActionBar().getHeight();
+        }
+        int contentTop = ((ViewGroup) findViewById(android.R.id.content)).getTop();
+        windowManager.getDefaultDisplay().getSize(size);
+        size.y -= (contentTop + actionBarHeight);
+        return size;
     }
 }

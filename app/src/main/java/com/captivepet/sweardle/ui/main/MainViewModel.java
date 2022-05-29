@@ -3,31 +3,45 @@ package com.captivepet.sweardle.ui.main;
 import android.app.Application;
 import android.view.View;
 import android.widget.Button;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
+
 import java.util.ArrayList;
+
 import com.captivepet.sweardle.CustomImageButton;
 import com.captivepet.sweardle.TilePair;
 import com.captivepet.sweardle.R;
 
 public class MainViewModel extends AndroidViewModel {
-    final static int ENTER = '↵';
-    final static int DEL = '←';
+//    final static int ENTER = '↵';
+//    final static int DEL = '←';
     private MutableLiveData<String> keyboardSignal;
     private MutableLiveData<String> gameSignal;
     private String gameWord;
     private int rowsDone = 0;
     private boolean TESTED = false;
+
     public boolean getTESTED() {
         return TESTED;
     }
+
     private boolean WINNER = false;
-    public boolean getWinner() { return WINNER; }
+
+    public boolean getWinner() {
+        return WINNER;
+    }
+
     final private ArrayList<TilePair> currentRow = new ArrayList<>();
-    public ArrayList<TilePair> getCurrentRow() { return currentRow; }
+
+    public ArrayList<TilePair> getCurrentRow() {
+        return currentRow;
+    }
+
     private final String[] dict;
     private final String[] words;
+
     public String getGameWord() {
         return gameWord;
     }
@@ -60,38 +74,41 @@ public class MainViewModel extends AndroidViewModel {
         rowsDone = 0;
     }
 
-    public void onClick(View view) {
+    public void onKeyboard(View view) {
         if (WINNER) {
             return;
         }
         char keyChar;
         int position = currentRow.size();
-        if (view instanceof CustomImageButton) {
-            keyChar = ((CustomImageButton) view).getText().charAt(0);
+        if (view.getTag().toString().charAt(0) == KeyboardFragment.ENTER) {
+            keyChar = KeyboardFragment.ENTER;
+        } else if (view.getTag().toString().charAt(0) == KeyboardFragment.DEL) {
+            keyChar = KeyboardFragment.DEL;
         } else {
             keyChar = ((Button) view).getText().charAt(0);
         }
-        if (keyChar == ENTER && !TESTED && position == GameFragment.WORD_LENGTH) {
+        if (keyChar == KeyboardFragment.ENTER && !TESTED && position == GameFragment.WORD_LENGTH) {
             if (validateGuess()) {
                 WINNER = testWord();
                 TESTED = true;
-                getKeyboardSignal().setValue(GameFragment.ROW_UPDATED);
+                getKeyboardSignal().setValue("TODO");
             }
-        } else if (keyChar == DEL && !TESTED && position > 0) {
+        } else if (keyChar == KeyboardFragment.DEL && !TESTED && position > 0) {
             currentRow.remove(position - 1);
-        } else if (keyChar == ENTER || keyChar == DEL) {
+        } else if (keyChar == KeyboardFragment.ENTER || keyChar == KeyboardFragment.DEL) {
             return;
         } else if (position < GameFragment.WORD_LENGTH) { // letter key
             currentRow.add(new TilePair(keyChar, TilePair.UNCHECKED));
         }
         if (WINNER) {
-            gameSignal.setValue(GameFragment.WINNER);
+            getGameSignal().setValue(GameFragment.WINNER);
         } else {
-            gameSignal.setValue(GameFragment.READY);
+            getGameSignal().setValue(GameFragment.READY);
         }
     }
 
     public void newRow() {
+        getKeyboardSignal().setValue(GameFragment.ROW_UPDATED);
         rowsDone++;
         currentRow.clear();
         TESTED = false;
@@ -132,9 +149,7 @@ public class MainViewModel extends AndroidViewModel {
         boolean WIN = true;
         for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) { // find misplaced
             for (int jx = 0; jx < GameFragment.WORD_LENGTH; jx++) {
-                if (word[ix] == GameFragment.EMPTY) {
-                    continue; // noop if already matched
-                } else if (word[ix] == guess[jx].getC() && guess[jx].getD() == TilePair.UNCHECKED) {
+                if (word[ix] == guess[jx].getC() && guess[jx].getD() == TilePair.UNCHECKED) {
                     guess[jx].setD(TilePair.MISPLACED);
                     WIN = false;
                     break; // word[ix] only gets one match

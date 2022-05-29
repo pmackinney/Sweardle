@@ -34,6 +34,7 @@ public class GameFragment extends Fragment {
     private ConstraintLayout mLayout;
     private MainViewModel mViewModel;
     int tileWidth;
+    public static final int TILE_WIDTH_ADJUST = 2;
     public static final String READY = "Ready";
     public static final String WINNER = "Winner";
     public static final String ROW_UPDATED = "ready for keyboard update";
@@ -81,9 +82,6 @@ public class GameFragment extends Fragment {
         }
         ArrayList<TilePair> row = (ArrayList<TilePair>) mViewModel.getCurrentRow().clone();
         int rowsDone = mViewModel.getRowsDone();
-        if (mViewModel.getTESTED()) {
-            mViewModel.newRow();
-        }
         int nextChar = row.size();
         int startOfRow = rowsDone * WORD_LENGTH;
         for (int ix = 0; ix < row.size(); ix++) {
@@ -102,7 +100,7 @@ public class GameFragment extends Fragment {
     }
 
     public void init(int height) {
-        tileWidth = height / (WORD_LENGTH + 1);
+        tileWidth = height / (WORD_LENGTH + TILE_WIDTH_ADJUST);
         // make all the tiles;
         for (int ix = 0; ix < ROW_COUNT * WORD_LENGTH; ix++) {
             Button k = new Button(mLayout.getContext());
