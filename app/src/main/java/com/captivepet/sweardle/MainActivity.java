@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
                 int gameSize = keyboard.computeSizes(getDisplayContentHeight());
                 keyboard.init();
                 tile.init(gameSize);
+                tile.resetTiles();
             }
         });
 

@@ -1,7 +1,6 @@
 package com.captivepet.sweardle.ui.main;
 
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -296,7 +295,7 @@ public class KeyboardFragment extends Fragment {
     }
 
     private void updateKeyboard(@NonNull String signal) {
-        if (signal.equals(GameFragment.RESET_KEYS)) {
+        if (signal.equals(GameFragment.RESET)) {
             for (View k : key) {
                 k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
             }
