@@ -1,12 +1,15 @@
 package com.captivepet.sweardle.ui.main;
 import static com.captivepet.sweardle.R.id.fragment_game;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
@@ -16,9 +19,13 @@ import androidx.fragment.app.Fragment;
 
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -26,11 +33,13 @@ import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class GameFragment extends Fragment {
 
     private ConstraintLayout mLayout;
     private MainViewModel mViewModel;
+    private Toolbar mainToolbar;
     private final Button[] tile = new Button[ROW_COUNT * WORD_LENGTH];
     private final int TILE_MARGIN = 1;
     private final int TILE_WIDTH_ADJUST = 2;
@@ -58,6 +67,7 @@ public class GameFragment extends Fragment {
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.fragment_game, container, false);
     }
 
@@ -67,6 +77,8 @@ public class GameFragment extends Fragment {
         mLayout = view.findViewById(fragment_game);
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
         mViewModel.getGameSignal().observe(getViewLifecycleOwner(), this::signalReceived);
+        mainToolbar = requireActivity().findViewById(R.id.main_toolbar);
+        ((AppCompatActivity) requireActivity()).setSupportActionBar(mainToolbar);
 
         // called this way to ensure that KeyboardFragment as finished init()
         View parent = (View) mLayout.getParent();
@@ -77,6 +89,27 @@ public class GameFragment extends Fragment {
                 mViewModel.newGame();
             }
         });
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.game_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.new_game:
+                this.newGame();
+                return true;
+            case R.id.statistics:
+                this.showStatistics();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public void signalReceived(String signal) {
@@ -221,6 +254,8 @@ public class GameFragment extends Fragment {
         builder.setNegativeButton(getString(R.string.cancel),
             (dialog, id) -> dialog.dismiss());
         AlertDialog dialog = builder.create();
+        dialog.getWindow().setGravity(Gravity.BOTTOM);
+        dialog.getWindow().getAttributes().verticalMargin = tile[0].getHeight() / 2;
         dialog.show();
     }
 
@@ -229,5 +264,19 @@ public class GameFragment extends Fragment {
         Toast t = Toast.makeText(requireContext().getApplicationContext(),
                 "Sorry, I don't know that word", Toast.LENGTH_LONG);
         t.show();
+    }
+
+    public void showStatistics() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Statistics");
+        builder.setMessage("You're doing great!");
+        builder.setPositiveButton("Close",
+            (dialog, id) -> {
+                dialog.dismiss();
+            });
+    }
+
+    public void newGame() {
+        mViewModel.newGame();
     }
 }
