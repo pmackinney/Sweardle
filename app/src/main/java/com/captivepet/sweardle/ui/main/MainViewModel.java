@@ -76,12 +76,12 @@ public class MainViewModel extends AndroidViewModel {
                     WINNER = testWord();
                     getGameSignal().setValue(GameFragment.ROW_UPDATED);
                     getKeyboardSignal().setValue(GameFragment.ROW_UPDATED);
+                    newRow();
                     if (WINNER) {
                         getGameSignal().setValue(GameFragment.WINNER);
-                    } else if (rowsDone == GameFragment.ROW_COUNT) {
+                    } if (!WINNER && (rowsDone == GameFragment.ROW_COUNT)) {
                         getGameSignal().setValue(GameFragment.LOSER);
                     }
-                    newRow();
                 } else {
                     getGameSignal().setValue(GameFragment.BAD_WORD);
                 }
