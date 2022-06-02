@@ -87,9 +87,9 @@ public class KeyboardFragment extends Fragment {
             gameboardSize = size.y - keyboardHeight;
         } else { // landscape
             gameboardSize = (int) Math.min(size.x - size.y, size.x / 2f);
-            keyboardWeight = size.x - (gameboardSize / size.x);
+            keyboardWeight = size.x - (gameboardSize / (float) size.x);
 //            gameboardSize += 1 - keyboardWeight;
-            keyboardWidth = size.x - (int) gameboardSize;
+            keyboardWidth = size.x - gameboardSize;
             keyWidth = keyboardWidth / KEY_WIDTH_DIVISOR;
             keyMargin = 1;
             keyHeight = (int) (MAX_KEY_HEIGHT_RATIO * keyWidth);
@@ -130,7 +130,7 @@ public class KeyboardFragment extends Fragment {
             k.setText(String.format(Locale.US, "%c", KEY_LABEL[ix]));
             k.setTag(TilePair.UNCHECKED);
             k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
-            key[ix] = (Button) k;
+            key[ix] = k;
         }
 
         // label & position the keys
@@ -233,24 +233,16 @@ public class KeyboardFragment extends Fragment {
         set.applyTo(mLayout);
 
         // special delButton setup for testing
-        delButton.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                toggleKeyBoardWidth(view);
-                return false;
-            }
+        delButton.setOnLongClickListener(view -> {
+            toggleKeyBoardWidth(view);
+            return false;
         });
         set.applyTo(mLayout);
     }
 
     public void setCommonProperties(View button) {
         button.setId(View.generateViewId());
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mViewModel.onKeyboard(view);
-            }
-        });
+        button.setOnClickListener(view -> mViewModel.onKeyboard(view));
         mLayout.addView(button);
     }
 
@@ -309,7 +301,7 @@ public class KeyboardFragment extends Fragment {
                         setKeyStatus(mKey, TilePair.CORRECT);
                     } else if (guessStatus == TilePair.MISPLACED && keyStatus != TilePair.MISPLACED) {
                         setKeyStatus(mKey, TilePair.MISPLACED);
-                    } else if (guessStatus == TilePair.INCORRECT && keyStatus != TilePair.INCORRECT) {
+                    } else if (guessStatus == TilePair.INCORRECT) {
                         setKeyStatus(mKey, TilePair.INCORRECT);
                     }
                 }
