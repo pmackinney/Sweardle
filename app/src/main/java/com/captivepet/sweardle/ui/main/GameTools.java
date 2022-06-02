@@ -1,5 +1,6 @@
 package com.captivepet.sweardle.ui.main;
 
+import android.content.Context;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,10 +27,9 @@ import java.util.Locale;
 /**
  * Builds the keyboard which never changes
  */
-public class KeyboardFragment extends Fragment {
+public class GameTools implements Runnable {
 
-    private MainViewModel mViewModel;
-    private ConstraintLayout mLayout;
+    private final Context context;
     private float keyboardWeight;
     private int keyHeight;
     private int keyWidth;
@@ -53,23 +53,13 @@ public class KeyboardFragment extends Fragment {
     private ImageButton enterButton;
     private ImageButton delButton;
 
-    public KeyboardFragment() {} // Required empty public constructor ??
-    public static KeyboardFragment newInstance() { return new KeyboardFragment(); }
-
-    @RequiresApi(api = Build.VERSION_CODES.R)
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_keyboard, container, false);
+    public GameTools(Context context) {
+        this.context = context;
     }
-
+    
     @Override
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        mLayout = view.findViewById(R.id.fragment_keyboard);
-        mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        mViewModel.getKeyboardSignal().observe(getViewLifecycleOwner(), this::updateKeyboard);
+    public void run() {
+
     }
 
     public int computeSizes(Point size) {
@@ -105,20 +95,20 @@ public class KeyboardFragment extends Fragment {
     public float getNewKeyboardWeight() {
         return newKeyboardWeight;
     }
-    public void init() {
+    public void makeKeyboard() {
         // make the keys
-        ENTER = getString(R.string.enter_symbol).charAt(0);
-        enterButton = new ImageButton(getContext());
-        enterButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
-        enterButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_keyboard_return_24));
-        enterButton.setTag(getString(R.string.enter_symbol));
+        ENTER = context.getString(R.string.enter_symbol).charAt(0);
+        enterButton = new ImageButton(context);
+        enterButton.setBackground(AppCompatResources.getDrawable(context, R.drawable.frame_highlight));
+        enterButton.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_baseline_keyboard_return_24));
+        enterButton.setTag(context.getString(R.string.enter_symbol));
         setCommonProperties(enterButton);
 
-        DEL = getString(R.string.del_symbol).charAt(0);
-        delButton = new ImageButton(getContext());
-        delButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
-        delButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_undo_24));
-        delButton.setTag(getString(R.string.del_symbol));
+        DEL = context.getString(R.string.del_symbol).charAt(0);
+        delButton = new ImageButton(context);
+        delButton.setBackground(AppCompatResources.getDrawable(context, R.drawable.frame_highlight));
+        delButton.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_baseline_undo_24));
+        delButton.setTag(context.getString(R.string.del_symbol));
         setCommonProperties(delButton);
 
         for (int ix = 0; ix < key.length; ix++) {
@@ -129,7 +119,7 @@ public class KeyboardFragment extends Fragment {
             k.setGravity(Gravity.CENTER);
             k.setText(String.format(Locale.US, "%c", KEY_LABEL[ix]));
             k.setTag(TilePair.UNCHECKED);
-            k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
+            k.setBackground(AppCompatResources.getDrawable(context, TilePair.UNCHECKED));
             key[ix] = (Button) k;
         }
 
@@ -297,7 +287,7 @@ public class KeyboardFragment extends Fragment {
     private void updateKeyboard(@NonNull String signal) {
         if (signal.equals(GameFragment.RESET)) {
             for (View k : key) {
-                k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
+                k.setBackground(AppCompatResources.getDrawable(context, TilePair.UNCHECKED));
             }
         } else if (signal.equals(GameFragment.ROW_UPDATED)) {
             for (TilePair guess : mViewModel.getCurrentRow()) {
@@ -318,7 +308,7 @@ public class KeyboardFragment extends Fragment {
     }
 
     private void setKeyStatus(Button key, int status) {
-        key.setBackground(AppCompatResources.getDrawable(requireContext(), status));
+        key.setBackground(AppCompatResources.getDrawable(context, status));
         key.setTag(status);
     }
 }

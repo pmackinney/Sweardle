@@ -4,4 +4,5 @@
     android:layout_height="wrap_content"
     android:padding="2dp"
     android:adjustViewBounds="true"
-    android:scaleType="fitCenter" />
+    android:scaleType="fitCenter"
+    android:background="@drawable/frame_white" />

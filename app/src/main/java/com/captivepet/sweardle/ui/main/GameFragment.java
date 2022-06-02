@@ -1,7 +1,6 @@
 package com.captivepet.sweardle.ui.main;
 import static com.captivepet.sweardle.R.id.fragment_game;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
@@ -24,8 +23,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -33,7 +30,6 @@ import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class GameFragment extends Fragment {
 
@@ -76,19 +72,19 @@ public class GameFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mLayout = view.findViewById(fragment_game);
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        mViewModel.getGameSignal().observe(getViewLifecycleOwner(), this::signalReceived);
+        mViewModel.getGameSignal().observe(getViewLifecycleOwner(), this::signalProcessor);
         mainToolbar = requireActivity().findViewById(R.id.main_toolbar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(mainToolbar);
 
-        // called this way to ensure that KeyboardFragment as finished init()
-        View parent = (View) mLayout.getParent();
-        parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                mViewModel.newGame();
-            }
-        });
+//        // called this way to ensure that KeyboardFragment as finished init()
+//        View parent = (View) mLayout.getParent();
+//        parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//            @Override
+//            public void onGlobalLayout() {
+//                parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+//                mViewModel.newGame();
+//            }
+//        });
     }
 
     @Override
@@ -112,7 +108,7 @@ public class GameFragment extends Fragment {
         }
     }
 
-    public void signalReceived(String signal) {
+    public void signalProcessor(String signal) {
         if (BAD_WORD.equals(signal)) {
             badWordAlert();
         } else if (RESET.equals(signal)) {

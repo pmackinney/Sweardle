@@ -1,6 +1,7 @@
 package com.captivepet.sweardle.ui.main;
 
 import android.app.Application;
+import android.service.quicksettings.Tile;
 import android.view.View;
 import android.widget.Button;
 import androidx.annotation.NonNull;
@@ -8,25 +9,41 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 import java.util.ArrayList;
 import com.captivepet.sweardle.TilePair;
-import com.captivepet.sweardle.R;
 
 public class MainViewModel extends AndroidViewModel {
     private MutableLiveData<String> keyboardSignal;
     private MutableLiveData<String> gameSignal;
 
+    // Game data
+    /**
+     * The dictionary of allowable guesses
+     */
+    private String[] dict;
+    /**
+     * The dictionary of possible solutions
+     */
+    private String[] words;
+    /**
+     * The solution
+     */
+    private String gameWord;
+    /**
+     * The array of previous guesses, immutable for the rest of the game.
+     * Its size is always a multiple of GameFragment.WORD_LENGTH.
+     */
+    final private ArrayList<TilePair> completedRows = new ArrayList<>();
+    /**
+     * The current row. It becomes a guess when the player taps ENTER.
+     */
     final private ArrayList<TilePair> currentRow = new ArrayList<>();
-    private final String[] dict;
-    private final String[] words;
 
-    private int rowsDone = 0;
+    // Logic controls
     private boolean ROW_TESTED = false;
     private boolean WINNER = false;
-    private String gameWord;
+
 
     public MainViewModel(@NonNull Application application) {
         super(application);
-        this.dict = getApplication().getResources().getStringArray(R.array.dict);
-        this.words = getApplication().getResources().getStringArray(R.array.words);
     }
 
     public String getGameWord() {
@@ -52,25 +69,29 @@ public class MainViewModel extends AndroidViewModel {
 
     public void newGame() {
         newRow();
-        rowsDone = 0;
         WINNER = false;
-        gameWord = getNewGameWord();
+        gameWord = selectGameWord();
     }
 
     private void newRow() {
-        rowsDone++;
         currentRow.clear();
         ROW_TESTED = false;
     }
 
-    private String getNewGameWord() {
+    private String selectGameWord() {
         return words[(int) (Math.random() * words.length)];
     }
 
+    private void setDictionary(String[] dict) {
+        this.dict = dict;
+    }
+    private void setWords(String[] words) {
+        this.words = words;
+    }
     public void onKeyboard(View view) {
         char keyChar = getChar(view);
         int position = currentRow.size();
-        if (keyChar == KeyboardFragment.ENTER) {
+        if (keyChar == Keyboard.ENTER) {
             if (!ROW_TESTED && position == GameFragment.WORD_LENGTH) {
                 if (validateGuess()) {
                     WINNER = testWord();
@@ -79,14 +100,14 @@ public class MainViewModel extends AndroidViewModel {
                     newRow();
                     if (WINNER) {
                         getGameSignal().setValue(GameFragment.WINNER);
-                    } if (!WINNER && (rowsDone == GameFragment.ROW_COUNT)) {
+                    } if (!WINNER && (completedRows.size() / GameFragment.WORD_LENGTH == GameFragment.ROW_COUNT)) {
                         getGameSignal().setValue(GameFragment.LOSER);
                     }
                 } else {
                     getGameSignal().setValue(GameFragment.BAD_WORD);
                 }
             }
-        } else if (keyChar == KeyboardFragment.DEL) {
+        } else if (keyChar == Keyboard.DEL) {
             if (!ROW_TESTED && position > 0) {
                 currentRow.remove(position - 1);
                 getGameSignal().setValue(GameFragment.DEL);
@@ -103,10 +124,10 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     private char getChar(View view) {
-        if (view.getTag().toString().charAt(0) == KeyboardFragment.ENTER) {
-            return KeyboardFragment.ENTER;
-        } else if (view.getTag().toString().charAt(0) == KeyboardFragment.DEL) {
-            return KeyboardFragment.DEL;
+        if (view.getTag().toString().charAt(0) == Keyboard.ENTER) {
+            return Keyboard.ENTER;
+        } else if (view.getTag().toString().charAt(0) == Keyboard.DEL) {
+            return Keyboard.DEL;
         } else {
             return ((Button) view).getText().charAt(0);
         }
@@ -165,6 +186,6 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public int getRowsDone() {
-        return rowsDone;
+        return completedRows.size() / GameFragment.WORD_LENGTH;
     }
 }
