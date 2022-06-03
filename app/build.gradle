@@ -5,10 +5,7 @@ plugins {
 android {
     signingConfigs {
         debug {
-            storeFile file('/Volumes/Elvis/paul/AndroidStudioProjects/keystore_captivepet')
-            storePassword 'FfsbhQ!cLGq7pxMQ'
-            keyPassword 'FfsbhQ!cLGq7pxMQ'
-            keyAlias 'Sweardle'
+            
         }
     }
     compileSdk 32
