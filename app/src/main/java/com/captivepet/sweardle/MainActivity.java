@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         if (getActionBar() != null) {
             actionBarHeight = getActionBar().getHeight();
         }
-        int contentTop = ((ViewGroup) findViewById(android.R.id.content)).getTop();
+        int contentTop = findViewById(android.R.id.content).getTop();
         windowManager.getDefaultDisplay().getSize(size);
         size.y -= (contentTop + actionBarHeight);
         return size;

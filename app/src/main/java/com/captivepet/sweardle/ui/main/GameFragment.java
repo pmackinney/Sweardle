@@ -1,22 +1,18 @@
 package com.captivepet.sweardle.ui.main;
-import static com.captivepet.sweardle.R.id.fragment_game;
 
-import androidx.appcompat.app.ActionBar;
+import static com.captivepet.sweardle.R.id.fragment_game;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.lifecycle.ViewModelProvider;
-
 import androidx.appcompat.app.AlertDialog;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,15 +21,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
-
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
-
 import java.util.ArrayList;
-import java.util.Objects;
+
 
 public class GameFragment extends Fragment {
 
@@ -92,7 +85,7 @@ public class GameFragment extends Fragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.game_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -242,7 +235,7 @@ public class GameFragment extends Fragment {
 
     // https://www.javatpoint.com/android-alert-dialog-example
     private void newGameQuery(String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(getString(R.string.game_over));
         builder.setMessage(message);
         builder.setPositiveButton(getString(R.string.new_game),
@@ -255,7 +248,7 @@ public class GameFragment extends Fragment {
             (dialog, id) -> dialog.dismiss());
         AlertDialog dialog = builder.create();
         dialog.getWindow().setGravity(Gravity.BOTTOM);
-        dialog.getWindow().getAttributes().verticalMargin = tile[0].getHeight() / 2;
+        dialog.getWindow().getAttributes().verticalMargin = tile[0].getHeight() / 2f;
         dialog.show();
     }
 
@@ -267,16 +260,20 @@ public class GameFragment extends Fragment {
     }
 
     public void showStatistics() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Statistics");
         builder.setMessage("You're doing great!");
         builder.setPositiveButton("Close",
-            (dialog, id) -> {
-                dialog.dismiss();
-            });
+            (dialog, id) -> dialog.dismiss());
+        AlertDialog dialog = builder.create();
+        dialog.getWindow().setGravity(Gravity.BOTTOM);
+        dialog.getWindow().getAttributes().verticalMargin = tile[0].getHeight() / 2f;
+        dialog.show();
     }
 
     public void newGame() {
+        resetTiles();
+        mViewModel.getKeyboardSignal().setValue(RESET);
         mViewModel.newGame();
     }
 }
