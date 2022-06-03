@@ -8,29 +8,20 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:id="@+id/main_toolbar"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/Theme.Sweardle"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
-
     <androidx.fragment.app.FragmentContainerView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:id="@+id/main_fragment"
         android:layout_gravity="top"
-        android:layout_weight="0.5"
+        android:layout_weight="1"
         tools:layout="@layout/fragment_game" />
 
-    <androidx.fragment.app.FragmentContainerView
+ <!--   <androidx.fragment.app.FragmentContainerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:id="@+id/keyboard_fragment"
         android:layout_weight="0.5"
-        tools:layout="@layout/fragment_keyboard" />
+        tools:layout="@layout/fragment_keyboard" /> -->
 </LinearLayout>
 

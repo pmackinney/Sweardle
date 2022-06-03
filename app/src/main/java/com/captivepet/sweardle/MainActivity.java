@@ -27,18 +27,4 @@ public class MainActivity extends AppCompatActivity {
                     replace(R.id.main_fragment, new GameFragment()).commitNow();
         }
     }
-
-    // https://gist.github.com/dominicthomas/8257203
-    public Point getDisplayContentHeight() {
-        final WindowManager windowManager = getWindowManager();
-        final Point size = new Point();
-        int screenHeight = 0, actionBarHeight = 0;
-        if (getActionBar() != null) {
-            actionBarHeight = getActionBar().getHeight();
-        }
-        int contentTop = ((ViewGroup) findViewById(android.R.id.content)).getTop();
-        windowManager.getDefaultDisplay().getSize(size);
-        size.y -= (contentTop + actionBarHeight);
-        return size;
-    }
 }

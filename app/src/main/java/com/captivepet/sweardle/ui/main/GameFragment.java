@@ -6,9 +6,12 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.constraintlayout.widget.Guideline;
 import androidx.lifecycle.ViewModelProvider;
 
 import androidx.appcompat.app.AlertDialog;
+
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
@@ -23,6 +26,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -50,7 +55,7 @@ public class GameFragment extends Fragment {
     public static final String LOSER = "Loser";
     public static final String ROW_UPDATED = "Re-highlight row";
     public static final String RESET = "Clear all";
-    public static final String DEL = "" + KeyboardFragment.DEL;
+    public static final String DEL = "" + Keyboard.DEL;
 
     public boolean rowUpdated;
 
@@ -74,17 +79,22 @@ public class GameFragment extends Fragment {
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
         mViewModel.getGameSignal().observe(getViewLifecycleOwner(), this::signalProcessor);
         mainToolbar = requireActivity().findViewById(R.id.main_toolbar);
+        // called this way to ensure that KeyboardFragment as finished init()
+        View parent = (View) mLayout.getParent();
         ((AppCompatActivity) requireActivity()).setSupportActionBar(mainToolbar);
-
-//        // called this way to ensure that KeyboardFragment as finished init()
-//        View parent = (View) mLayout.getParent();
-//        parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-//            @Override
-//            public void onGlobalLayout() {
-//                parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-//                mViewModel.newGame();
-//            }
-//        });
+        parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                Keyboard k = new Keyboard(requireContext());
+                Point size = getDisplayContentSize();
+                k.setSize(size);
+                k.setmViewModel(mViewModel);
+                k.generateKeyboardBottomRight(mLayout);
+                init(size);
+                mViewModel.newGame();
+            }
+        });
     }
 
     @Override
@@ -137,8 +147,23 @@ public class GameFragment extends Fragment {
         }
     }
 
-    public void init(int height) {
-        int tileSize = height / (WORD_LENGTH + TILE_WIDTH_ADJUST);
+    public void init(Point size) {
+
+        Guideline endG = new Guideline(requireContext());
+        int endId = View.generateViewId();
+        endG.setId(endId);
+        Guideline bottomG = new Guideline(requireContext());
+        int bottomGId = View.generateViewId();
+        bottomG.setId(bottomGId);
+        ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
+        params.orientation = ConstraintLayout.LayoutParams.HORIZONTAL;
+        bottomG.setLayoutParams(params);
+        bottomG.setGuidelinePercent(0.5f); // portrait mode, top of keyboard is middle of screen
+        params.orientation = ConstraintLayout.LayoutParams.VERTICAL;
+        endG.setLayoutParams(params);
+        endG.setGuidelinePercent(0.0f); // portrait mode, left edge of keyboard is left edge of screen
+        int tileSize = size.x / (WORD_LENGTH + TILE_WIDTH_ADJUST);
         // make all the tiles;
         for (int ix = 0; ix < ROW_COUNT * WORD_LENGTH; ix++) {
             Button k = new Button(mLayout.getContext());
@@ -161,6 +186,7 @@ public class GameFragment extends Fragment {
             set.constrainMaxHeight(id, tileSize);
             int top, left, right, bottom, topS, leftS, rightS, bottomS, topM, leftM, rightM, bottomM;
             // top & bottom constraints
+
             if (ix == 0) {
                 set.setVerticalChainStyle(id, ConstraintSet.CHAIN_PACKED);
                 top = ConstraintSet.PARENT_ID;
@@ -173,8 +199,8 @@ public class GameFragment extends Fragment {
                 top = tile[ix - WORD_LENGTH].getId();
                 topS = ConstraintSet.BOTTOM;
                 topM = TILE_MARGIN;
-                bottom = ConstraintSet.PARENT_ID;
-                bottomS = ConstraintSet.BOTTOM;
+                bottom = bottomGId;
+                bottomS = ConstraintSet.TOP;
                 bottomM = tileSize / 2;
             } else if (ix % WORD_LENGTH == 0) {
                 top = tile[ix - WORD_LENGTH].getId();
@@ -204,8 +230,8 @@ public class GameFragment extends Fragment {
                 left = tile[ix - 1].getId();
                 leftS = ConstraintSet.RIGHT;
                 leftM = TILE_MARGIN;
-                right = ConstraintSet.PARENT_ID;
-                rightS = ConstraintSet.RIGHT;
+                right = endId;
+                rightS = ConstraintSet.LEFT;
                 rightM = 0;
             } else {
                 left = tile[ix - 1].getId();
@@ -220,7 +246,7 @@ public class GameFragment extends Fragment {
             set.connect(id, ConstraintSet.LEFT, left, leftS, leftM);
             set.connect(id, ConstraintSet.RIGHT, right, rightS, rightM);
         }
-        set.applyTo(mLayout);
+//        set.applyTo(mLayout);
     }
 
     public void resetTiles() {
@@ -274,5 +300,20 @@ public class GameFragment extends Fragment {
 
     public void newGame() {
         mViewModel.newGame();
+    }
+
+
+    // https://gist.github.com/dominicthomas/8257203
+    public Point getDisplayContentSize() {
+        final WindowManager windowManager = requireActivity().getWindowManager();
+        final Point size = new Point();
+        int screenHeight = 0, actionBarHeight = 0;
+        if (requireActivity().getActionBar() != null) {
+            actionBarHeight = requireActivity().getActionBar().getHeight();
+        }
+        int contentTop = ((ViewGroup) requireActivity().findViewById(android.R.id.content)).getTop();
+        windowManager.getDefaultDisplay().getSize(size);
+        size.y -= (contentTop + actionBarHeight);
+        return size;
     }
 }

@@ -8,6 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 import java.util.ArrayList;
+
+import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
 
 public class MainViewModel extends AndroidViewModel {
@@ -47,7 +49,18 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public String getGameWord() {
-        return gameWord;
+        return getGameWord(false);
+    }
+
+    public String getGameWord(boolean NEW) {
+        if (NEW || this.gameWord == null) {
+            if (words == null) {
+                words = getApplication().getResources().getStringArray(R.array.words);
+            }
+            return words[(int) (Math.random() * words.length)];
+        } else {
+            return gameWord;
+        }
     }
 
     public ArrayList<TilePair> getCurrentRow() {
@@ -70,16 +83,12 @@ public class MainViewModel extends AndroidViewModel {
     public void newGame() {
         newRow();
         WINNER = false;
-        gameWord = selectGameWord();
+        gameWord = getGameWord(true);
     }
 
     private void newRow() {
         currentRow.clear();
         ROW_TESTED = false;
-    }
-
-    private String selectGameWord() {
-        return words[(int) (Math.random() * words.length)];
     }
 
     private void setDictionary(String[] dict) {
