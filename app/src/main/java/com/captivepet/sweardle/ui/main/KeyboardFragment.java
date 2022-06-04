@@ -301,7 +301,7 @@ public class KeyboardFragment extends Fragment {
                         setKeyStatus(mKey, TilePair.CORRECT);
                     } else if (guessStatus == TilePair.MISPLACED && keyStatus != TilePair.MISPLACED) {
                         setKeyStatus(mKey, TilePair.MISPLACED);
-                    } else if (guessStatus == TilePair.INCORRECT) {
+                    } else if (guessStatus == TilePair.INCORRECT && keyStatus == TilePair.UNCHECKED) {
                         setKeyStatus(mKey, TilePair.INCORRECT);
                     }
                 }

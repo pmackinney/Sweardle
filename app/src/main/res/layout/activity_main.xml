@@ -12,10 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:id="@+id/main_toolbar"
-        android:background="?attr/colorPrimary"
         android:elevation="4dp"
-        android:theme="@style/Theme.Sweardle"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+        app:titleTextColor="?attr/colorOnPrimary"
+        android:background="?attr/colorPrimaryVariant" >
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textColor="#FF888888" />
+    </androidx.appcompat.widget.Toolbar>
 
     <androidx.fragment.app.FragmentContainerView
         android:layout_width="match_parent"

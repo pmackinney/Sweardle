@@ -71,6 +71,7 @@ public class GameFragment extends Fragment {
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
         mViewModel.getGameSignal().observe(getViewLifecycleOwner(), this::signalReceived);
         mainToolbar = requireActivity().findViewById(R.id.main_toolbar);
+//        mainToolbar.setTitleTextColor(R.color.white);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(mainToolbar);
 
         // called this way to ensure that KeyboardFragment as finished init()
@@ -233,6 +234,9 @@ public class GameFragment extends Fragment {
         rowUpdated = false;
     }
 
+    //  // Theme_AppCompat_DayNight_Dialog
+    // AlertDialog_AppCompat
+    // Base_ThemeOverlay_AppCompat_Dialog_Alert
     // https://www.javatpoint.com/android-alert-dialog-example
     private void newGameQuery(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
