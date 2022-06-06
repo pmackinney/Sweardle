@@ -6,6 +6,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.constraintlayout.widget.Guideline;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.appcompat.app.AlertDialog;
 import android.graphics.drawable.Drawable;
@@ -25,11 +26,15 @@ import android.widget.Button;
 import android.widget.Toast;
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
-import java.util.ArrayList;
+
+import java.util.List;
 
 
 public class GameFragment extends Fragment {
 
+    private int tileSize;
+    private float guideLinePercentage;
+    private boolean IS_PORTRAIT;
     private ConstraintLayout mLayout;
     private MainViewModel mViewModel;
     private Toolbar mainToolbar;
@@ -48,6 +53,7 @@ public class GameFragment extends Fragment {
     public static final String ROW_UPDATED = "Re-highlight row";
     public static final String RESET = "Clear all";
     public static final String DEL = "" + KeyboardFragment.DEL;
+    public static final String INIT = "Initialize";
 
     public boolean rowUpdated;
 
@@ -74,15 +80,15 @@ public class GameFragment extends Fragment {
 //        mainToolbar.setTitleTextColor(R.color.white);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(mainToolbar);
 
-        // called this way to ensure that KeyboardFragment as finished init()
-        View parent = (View) mLayout.getParent();
-        parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                mViewModel.newGame();
-            }
-        });
+//        // called this way to ensure that KeyboardFragment as finished init()
+//        View parent = (View) mLayout.getParent();
+//        parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//            @Override
+//            public void onGlobalLayout() {
+//                parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+//
+//            }
+//        });
     }
 
     @Override
@@ -115,18 +121,22 @@ public class GameFragment extends Fragment {
             newGameQuery(getString(R.string.congratulations));
         } else if (LOSER.equals(signal)) {
             newGameQuery(String.format(getString(R.string.taunt), mViewModel.getGameWord()));
+        } else if (INIT.equals(signal.substring(INIT.length()))) {
+            float pkg = Float.parseFloat(signal.substring(INIT.length()));
+            setSizes(pkg);
+            init();
         } else {
-            ArrayList<TilePair> row = mViewModel.getCurrentRow(); //(ArrayList<TilePair>) mViewModel.getCurrentRow().clone();
+            List<TilePair> row = mViewModel.getCurrentRow(); //(ArrayList<TilePair>) mViewModel.getCurrentRow().clone();
             int startOfRow = mViewModel.getRowsDone() * WORD_LENGTH;
             if (ADD_CHAR.equals(signal)) {
                 setTile(startOfRow + row.size() - 1,
-                            row.get(row.size() - 1).getC(),
-                            AppCompatResources.getDrawable(requireContext(), row.get(row.size() - 1).getD())
+                            row.get(row.size() - 1).getChar(),
+                            AppCompatResources.getDrawable(requireContext(), row.get(row.size() - 1).getStatusId())
                 );
             } else if (ROW_UPDATED.equals(signal)) {
                 for (int ix = 0; ix < WORD_LENGTH; ix++) { // redraw row to set highlights
-                    char c = row.get(ix).getC();
-                    Drawable d = AppCompatResources.getDrawable(requireContext(), row.get(ix).getD());
+                    char c = row.get(ix).getChar();
+                    Drawable d = AppCompatResources.getDrawable(requireContext(), row.get(ix).getStatusId());
                     setTile(startOfRow + ix, c, d);
                 }
             } else if (DEL.equals(signal)) {
@@ -135,8 +145,13 @@ public class GameFragment extends Fragment {
         }
     }
 
-    public void init(int height) {
-        int tileSize = height / (WORD_LENGTH + TILE_WIDTH_ADJUST);
+    public void setSizes(float sizePkg) {
+        tileSize = KeyboardFragment.getSizeFromPkg(sizePkg) / (WORD_LENGTH + TILE_WIDTH_ADJUST);
+        guideLinePercentage = KeyboardFragment.getPercentageFromPkg(sizePkg);
+        IS_PORTRAIT = KeyboardFragment.isPkgPortrait(sizePkg);
+    }
+
+    public void init() {
         // make all the tiles;
         for (int ix = 0; ix < ROW_COUNT * WORD_LENGTH; ix++) {
             Button k = new Button(mLayout.getContext());
@@ -147,6 +162,23 @@ public class GameFragment extends Fragment {
         }
         ConstraintSet set = new ConstraintSet();
         set.clone(mLayout);
+
+        Guideline fGuideline = new Guideline(requireContext());
+        int floor = View.generateViewId();
+        fGuideline.setId(floor);
+        mLayout.addView(fGuideline);
+        set.create(floor, ConstraintSet.HORIZONTAL_GUIDELINE);
+        float percentage = IS_PORTRAIT ? guideLinePercentage : 0.0f;
+        set.setGuidelinePercent(floor, guideLinePercentage);
+
+        Guideline rGuideline = new Guideline(requireContext());
+        int rightWall = View.generateViewId();
+        rGuideline.setId(rightWall);
+        mLayout.addView(rGuideline);
+        set.create(rightWall, ConstraintSet.VERTICAL_GUIDELINE);
+        percentage = IS_PORTRAIT ? 1.0f : guideLinePercentage;
+        set.setGuidelinePercent(rightWall, percentage);
+
         for (int ix = 0; ix < tile.length; ix++) {
             Button k = tile[ix];
             k.setEnabled(false);
@@ -171,8 +203,8 @@ public class GameFragment extends Fragment {
                 top = tile[ix - WORD_LENGTH].getId();
                 topS = ConstraintSet.BOTTOM;
                 topM = TILE_MARGIN;
-                bottom = ConstraintSet.PARENT_ID;
-                bottomS = ConstraintSet.BOTTOM;
+                bottom = floor;
+                bottomS = ConstraintSet.TOP;
                 bottomM = tileSize / 2;
             } else if (ix % WORD_LENGTH == 0) {
                 top = tile[ix - WORD_LENGTH].getId();
@@ -202,8 +234,8 @@ public class GameFragment extends Fragment {
                 left = tile[ix - 1].getId();
                 leftS = ConstraintSet.RIGHT;
                 leftM = TILE_MARGIN;
-                right = ConstraintSet.PARENT_ID;
-                rightS = ConstraintSet.RIGHT;
+                right = rightWall;
+                rightS = ConstraintSet.LEFT;
                 rightM = 0;
             } else {
                 left = tile[ix - 1].getId();

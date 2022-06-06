@@ -4,63 +4,64 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.graphics.Point;
 import android.os.Bundle;
-import android.util.Size;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
 
 import com.captivepet.sweardle.ui.main.GameFragment;
 import com.captivepet.sweardle.ui.main.KeyboardFragment;
 
 public class MainActivity extends AppCompatActivity {
-    public Size windowSize;
-    GameFragment tile;
-    KeyboardFragment keyboard;
+    final String TAG = this.getClass().getSimpleName();
+
     ViewGroup container;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        container = findViewById(R.id.container);
 
-        View parent = (View) container.getParent();
-        parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                int gameSize = keyboard.computeSizes(getDisplayContentHeight());
-                keyboard.init();
-                tile.init(gameSize);
-                tile.resetTiles();
-            }
-        });
 
-        if (savedInstanceState == null) {
-            keyboard = KeyboardFragment.newInstance();
-            getSupportFragmentManager().beginTransaction().replace(
-                    R.id.keyboard_fragment, keyboard).commitNow();
-            tile = GameFragment.newInstance();
-            getSupportFragmentManager().beginTransaction().replace(
-                    R.id.main_fragment, tile).commitNow();
-        }
+        View parent = findViewById(android.R.id.content);
+
+        parent.getViewTreeObserver().addOnGlobalLayoutListener(
+            new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                    KeyboardFragment keyboard = KeyboardFragment.newInstance();
+                    GameFragment gameboard = GameFragment.newInstance();
+                    if (savedInstanceState == null) {
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.keyboard_fragment, keyboard).commitNow();
+                        getSupportFragmentManager().beginTransaction().replace(
+                                R.id.main_fragment, gameboard).commitNow();
+                    }
+                    keyboard.setSize(getDisplayContentSize());
+                }
+            });
     }
 
     // https://gist.github.com/dominicthomas/8257203
-    public Point getDisplayContentHeight() {
-        final WindowManager windowManager = getWindowManager();
-        final Point size = new Point();
-        int screenHeight = 0, actionBarHeight = 0;
-        if (getActionBar() != null) {
-            actionBarHeight = getActionBar().getHeight();
+    public Point getDisplayContentSize() {
+        WindowManager wm = getWindowManager();
+        Point size = new Point();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            final WindowMetrics metrics = wm.getCurrentWindowMetrics();
+            size.x = metrics.getBounds().width();
+            size.y = metrics.getBounds().height();
+            Log.d(TAG, String.format("size from metrics: %d %d", size.x, size.y));
+        } else {
+            wm.getDefaultDisplay().getSize(size);
+            int actionBarHeight = (getActionBar() != null) ? getActionBar().getHeight() : androidx.appcompat.R.attr.actionBarSize;
+            int statusBarHeight = findViewById(android.R.id.content).getTop() - actionBarHeight;
+            size.y -= actionBarHeight + statusBarHeight;
+            Log.d(TAG, String.format("size from getSize() %d %d", size.x, size.y));
         }
-        int contentTop = findViewById(android.R.id.content).getTop();
-        windowManager.getDefaultDisplay().getSize(size);
-        size.y -= (contentTop + actionBarHeight);
         return size;
     }
 }
