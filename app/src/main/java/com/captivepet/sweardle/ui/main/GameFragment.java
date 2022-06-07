@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
@@ -33,12 +34,15 @@ import java.util.List;
 public class GameFragment extends Fragment {
 
     private int tileSize;
+    private float floorPercentage;
+    private float rightPercentage;
     private float guideLinePercentage;
+    private int tileTextColor = R.color.black;
     private boolean IS_PORTRAIT;
     private ConstraintLayout mLayout;
     private MainViewModel mViewModel;
     private Toolbar mainToolbar;
-    private final Button[] tile = new Button[ROW_COUNT * WORD_LENGTH];
+    private final TextView[] tile = new Button[ROW_COUNT * WORD_LENGTH];
     private final int TILE_MARGIN = 1;
     private final int TILE_WIDTH_ADJUST = 2;
     public final static int ROW_COUNT = 6;
@@ -67,6 +71,7 @@ public class GameFragment extends Fragment {
     public View onCreateView(
             @NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
+
         return inflater.inflate(R.layout.fragment_game, container, false);
     }
 
@@ -75,6 +80,9 @@ public class GameFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mLayout = view.findViewById(fragment_game);
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+        if (savedInstanceState != null) {
+            mViewModel set
+        }
         mViewModel.getGameSignal().observe(getViewLifecycleOwner(), this::signalReceived);
         mainToolbar = requireActivity().findViewById(R.id.main_toolbar);
 //        mainToolbar.setTitleTextColor(R.color.white);
@@ -121,7 +129,7 @@ public class GameFragment extends Fragment {
             newGameQuery(getString(R.string.congratulations));
         } else if (LOSER.equals(signal)) {
             newGameQuery(String.format(getString(R.string.taunt), mViewModel.getGameWord()));
-        } else if (INIT.equals(signal.substring(INIT.length()))) {
+        } else if (INIT.equals(signal.substring(0, INIT.length()))) {
             float pkg = Float.parseFloat(signal.substring(INIT.length()));
             setSizes(pkg);
             init();
@@ -149,71 +157,75 @@ public class GameFragment extends Fragment {
         tileSize = KeyboardFragment.getSizeFromPkg(sizePkg) / (WORD_LENGTH + TILE_WIDTH_ADJUST);
         guideLinePercentage = KeyboardFragment.getPercentageFromPkg(sizePkg);
         IS_PORTRAIT = KeyboardFragment.isPkgPortrait(sizePkg);
+        if (IS_PORTRAIT) {
+            floorPercentage = guideLinePercentage;
+            rightPercentage = 1.0f;
+        } else {
+            floorPercentage = 1.0f;
+            rightPercentage = guideLinePercentage;
+        }
     }
 
     public void init() {
         // make all the tiles;
         for (int ix = 0; ix < ROW_COUNT * WORD_LENGTH; ix++) {
-            Button k = new Button(mLayout.getContext());
+            TextView k = new Button(mLayout.getContext());
             mLayout.addView(k);
             k.setId(View.generateViewId());
-            k.setTextColor(AppCompatResources.getColorStateList(requireContext(), R.color.black));
+            k.setTextColor(AppCompatResources.getColorStateList(requireContext(), tileTextColor));
+            k.setGravity(Gravity.CENTER);
             tile[ix] = k;
         }
+//        Guideline floorGuideline = new Guideline(requireContext());
+//        int floorGuidelineId = View.generateViewId();
+//        floorGuideline.setId(floorGuidelineId);
+//        mLayout.addView(floorGuideline);
+//        Guideline rightGuideline = new Guideline(requireContext());
+//        int rightGuidelineId = View.generateViewId();
+//        mLayout.addView(rightGuideline);
+
+        // make the constraints
         ConstraintSet set = new ConstraintSet();
         set.clone(mLayout);
-
-        Guideline fGuideline = new Guideline(requireContext());
-        int floor = View.generateViewId();
-        fGuideline.setId(floor);
-        mLayout.addView(fGuideline);
-        set.create(floor, ConstraintSet.HORIZONTAL_GUIDELINE);
-        float percentage = IS_PORTRAIT ? guideLinePercentage : 0.0f;
-        set.setGuidelinePercent(floor, guideLinePercentage);
-
-        Guideline rGuideline = new Guideline(requireContext());
-        int rightWall = View.generateViewId();
-        rGuideline.setId(rightWall);
-        mLayout.addView(rGuideline);
-        set.create(rightWall, ConstraintSet.VERTICAL_GUIDELINE);
-        percentage = IS_PORTRAIT ? 1.0f : guideLinePercentage;
-        set.setGuidelinePercent(rightWall, percentage);
+//        set.create(floorGuidelineId, ConstraintSet.HORIZONTAL_GUIDELINE);
+//        set.setGuidelinePercent(floorGuidelineId, guideLinePercentage);
+//        set.create(rightGuidelineId, ConstraintSet.VERTICAL_GUIDELINE);
+//        set.setGuidelinePercent(rightGuidelineId, rightPercentage);
 
         for (int ix = 0; ix < tile.length; ix++) {
-            Button k = tile[ix];
-            k.setEnabled(false);
-
+            TextView k = tile[ix];
             int id = k.getId();
-            k.setGravity(Gravity.CENTER);
+
             // set tile widths
             set.constrainWidth(id, tileSize);
             set.constrainHeight(id, tileSize);
             set.constrainMaxHeight(id, tileSize);
             int top, left, right, bottom, topS, leftS, rightS, bottomS, topM, leftM, rightM, bottomM;
+
             // top & bottom constraints
-            if (ix == 0) {
+            if (ix == 0) { // top left
                 set.setVerticalChainStyle(id, ConstraintSet.CHAIN_PACKED);
                 top = ConstraintSet.PARENT_ID;
                 topS = ConstraintSet.TOP;
-                topM = tileSize / 2;
-                bottom = tile[ix + WORD_LENGTH].getId();
-                bottomS = ConstraintSet.TOP;
-                bottomM = TILE_MARGIN;
-            } else if (ix == (ROW_COUNT - 1) * WORD_LENGTH) {
-                top = tile[ix - WORD_LENGTH].getId();
-                topS = ConstraintSet.BOTTOM;
-                topM = TILE_MARGIN;
-                bottom = floor;
-                bottomS = ConstraintSet.TOP;
-                bottomM = tileSize / 2;
-            } else if (ix % WORD_LENGTH == 0) {
-                top = tile[ix - WORD_LENGTH].getId();
-                topS = ConstraintSet.BOTTOM;
                 topM = TILE_MARGIN;
                 bottom = tile[ix + WORD_LENGTH].getId();
                 bottomS = ConstraintSet.TOP;
                 bottomM = TILE_MARGIN;
-            } else {
+            } else if (ix == (ROW_COUNT - 1) * WORD_LENGTH) { // bottom left
+                top = tile[ix - WORD_LENGTH].getId();
+                topS = ConstraintSet.BOTTOM;
+                topM = TILE_MARGIN;
+                bottom = ConstraintSet.PARENT_ID;
+                bottomS = ConstraintSet.BOTTOM;
+                bottomM = TILE_MARGIN;
+            } else if (ix % WORD_LENGTH == 0) { // other left edge tiles
+                top = tile[ix - WORD_LENGTH].getId();
+                topS = ConstraintSet.BOTTOM;
+                topM = TILE_MARGIN;
+                bottom = tile[ix + WORD_LENGTH].getId();
+                bottomS = ConstraintSet.TOP;
+                bottomM = TILE_MARGIN;
+            } else { // all other tiles align vertically to tile at left
                 top = tile[ix - 1].getId();
                 topS = ConstraintSet.TOP;
                 topM = 0;
@@ -221,23 +233,24 @@ public class GameFragment extends Fragment {
                 bottomS = ConstraintSet.BOTTOM;
                 bottomM = 0;
             }
+
             // left & right constraints
-            if (ix % WORD_LENGTH == 0) {
+            if (ix % WORD_LENGTH == 0) { // left edge
                 set.setHorizontalChainStyle(id, ConstraintSet.CHAIN_PACKED);
                 left = ConstraintSet.PARENT_ID;
                 leftS = ConstraintSet.LEFT;
-                leftM = 0;
+                leftM = TILE_MARGIN;
                 right = tile[ix + 1].getId();
                 rightS = ConstraintSet.LEFT;
                 rightM = TILE_MARGIN;
-            } else if (ix % WORD_LENGTH == WORD_LENGTH - 1) {
+            } else if (ix % WORD_LENGTH == WORD_LENGTH - 1) { // right edge
                 left = tile[ix - 1].getId();
                 leftS = ConstraintSet.RIGHT;
                 leftM = TILE_MARGIN;
-                right = rightWall;
-                rightS = ConstraintSet.LEFT;
-                rightM = 0;
-            } else {
+                right = ConstraintSet.PARENT_ID;
+                rightS = ConstraintSet.RIGHT;
+                rightM = TILE_MARGIN;
+            } else { // middle
                 left = tile[ix - 1].getId();
                 leftS = ConstraintSet.RIGHT;
                 leftM = TILE_MARGIN;

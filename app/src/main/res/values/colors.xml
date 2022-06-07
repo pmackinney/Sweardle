@@ -11,4 +11,5 @@
     <color name="ochre">#FFDAA53A</color>
     <color name="darkgrey">#FF7D7A76</color>
     <color name="purplehighlight">#FFAA86FC</color>
+    <color name="frame_highlight">#FFD8BFD8</color>
 </resources>

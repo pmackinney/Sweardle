@@ -2,6 +2,8 @@ package com.captivepet.sweardle.ui.main;
 
 import android.app.Application;
 import android.app.GameManager;
+import android.content.Context;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import androidx.annotation.NonNull;
@@ -26,10 +28,13 @@ public class MainViewModel extends AndroidViewModel {
     private boolean WINNER = false;
     private String gameWord;
 
-    public MainViewModel(@NonNull Application application) {
-        super(application);
-        this.dict = getApplication().getResources().getStringArray(R.array.dict);
-        this.words = getApplication().getResources().getStringArray(R.array.words);
+    public MainViewModel(@NonNull Context context, Bundle savedInstanceState) {
+        super();
+        this.dict = context.getResources().getStringArray(R.array.dict);
+        this.words = context.getResources().getStringArray(R.array.words);
+        if (savedInstanceState != null) {
+
+        }
     }
 
     public String getGameWord() {

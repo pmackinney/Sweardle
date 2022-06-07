@@ -21,6 +21,8 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
@@ -45,7 +47,7 @@ public class KeyboardFragment extends Fragment {
     float newKeyboardWeight;
     private final int KEY_WIDTH_DIVISOR = 12; // How many keys wide is the full KB width?
     private final int KEY_MARGIN_DIVISOR = 12; // How many margins = 1 key?
-    private final float MAX_KEY_HEIGHT_RATIO = 1.5f; // Max keyHeight relative to keyWidth
+    private final float MAX_KEY_HEIGHT_RATIO = 1.2f; // Max keyHeight relative to keyWidth
 
     public static final char[] KEY_LABEL = new char[]{
             'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
@@ -132,19 +134,20 @@ public class KeyboardFragment extends Fragment {
     private String getGameSizePkgString() {
         return String.format(Locale.US, "%f", gameboardSizePkg);
     }
-
+    int keyboardHeight, keyboardWidth, gameSize;
     public void computeSizes(Point size) {
-        int keyboardHeight, keyboardWidth, gameSize;
+
         if (size.y >= size.x) { // portrait
             keyboardWidth = size.x;
+
             keyWidth = keyboardWidth / KEY_WIDTH_DIVISOR;
             keyMargin = keyWidth / KEY_MARGIN_DIVISOR;
-            keyboardHeight = Math.max(size.y - size.x, 4 * keyWidth);
+            keyboardHeight = Math.max(size.y - size.x - 56, 4 * keyWidth);
             keyHeight = Math.min(keyboardHeight / 4, (int) (MAX_KEY_HEIGHT_RATIO * keyWidth));
-            gameSize = size.y - keyboardHeight;
+            gameSize = size.y - keyboardHeight - 2 * 56;
             ceilingPercent = gameSize / (float) size.y;
             setGameboardSizePkg(gameSize, ceilingPercent, PORTRAIT);
-            leftWallPercent = 1.0f;
+            leftWallPercent = 0.0f;
         } else { // landscape
             gameSize = (int) Math.min(size.x - size.y, size.x / 2f);
             keyboardWidth = size.x - gameSize;
@@ -188,20 +191,22 @@ public class KeyboardFragment extends Fragment {
         // guidelines, label & position the keys
         ConstraintSet set = new ConstraintSet();
         set.clone(mLayout);
+        set.constrainHeight(mLayout.getId(), keyboardHeight);
+        set.constrainWidth(mLayout.getId(), keyboardWidth);
 
-        Guideline cGuideline = new Guideline(requireContext());
-        int ceiling = View.generateViewId();
-        cGuideline.setId(ceiling);
-        mLayout.addView(cGuideline);
-        set.create(ceiling, ConstraintSet.HORIZONTAL_GUIDELINE);
-        set.setGuidelinePercent(ceiling, ceilingPercent);
-
-        Guideline rGuideline = new Guideline(requireContext());
-        int leftWall = View.generateViewId();
-        rGuideline.setId(leftWall);
-        mLayout.addView(rGuideline);
-        set.create(leftWall, ConstraintSet.VERTICAL_GUIDELINE);
-        set.setGuidelinePercent(leftWall, leftWallPercent);
+//        Guideline cGuideline = new Guideline(requireContext());
+//        int ceiling = View.generateViewId();
+//        cGuideline.setId(ceiling);
+//        mLayout.addView(cGuideline);
+//        set.create(ceiling, ConstraintSet.HORIZONTAL_GUIDELINE);
+//        set.setGuidelinePercent(ceiling, ceilingPercent);
+//
+//        Guideline rGuideline = new Guideline(requireContext());
+//        int leftWall = View.generateViewId();
+//        rGuideline.setId(leftWall);
+//        mLayout.addView(rGuideline);
+//        set.create(leftWall, ConstraintSet.VERTICAL_GUIDELINE);
+//        set.setGuidelinePercent(leftWall, leftWallPercent);
         for (int ix = 0; ix < key.length; ix++) {
             View k = key[ix];
             int id = k.getId();
@@ -212,10 +217,10 @@ public class KeyboardFragment extends Fragment {
 
             // top & bottom constraints
             if (ix == 0) {
-                set.setVerticalChainStyle(id, ConstraintSet.CHAIN_SPREAD);
-                top = ceiling;
-                topS = ConstraintSet.BOTTOM;
-                topM = keyHeight / 2;
+                set.setVerticalChainStyle(id, ConstraintSet.CHAIN_PACKED);
+                top = ConstraintSet.PARENT_ID;
+                topS = ConstraintSet.TOP;
+                topM = keyMargin;
                 bottom = key[10].getId();
                 bottomS = ConstraintSet.TOP;
                 bottomM = keyMargin;
@@ -232,7 +237,7 @@ public class KeyboardFragment extends Fragment {
                 topM = keyMargin;
                 bottom = ConstraintSet.PARENT_ID;
                 bottomS = ConstraintSet.BOTTOM;
-                bottomM = keyHeight / 2;
+                bottomM = keyMargin;
             } else {
                 top = key[ix - 1].getId();
                 topS = ConstraintSet.TOP;
@@ -250,8 +255,8 @@ public class KeyboardFragment extends Fragment {
                     leftM = keyMargin;
                 } else { // ix = 0 or 10
                     set.setHorizontalChainStyle(id, ConstraintSet.CHAIN_PACKED);
-                    left = leftWall;
-                    leftS = ConstraintSet.RIGHT;
+                    left = ConstraintSet.PARENT_ID;
+                    leftS = ConstraintSet.LEFT;
                     leftM = keyMargin;
                 }
                 right = key[ix + 1].getId();
@@ -285,7 +290,7 @@ public class KeyboardFragment extends Fragment {
         }
         set.connect(enterButton.getId(), ConstraintSet.TOP, key[19].getId(), ConstraintSet.TOP, 0);
         set.connect(enterButton.getId(), ConstraintSet.BOTTOM, key[19].getId(), ConstraintSet.BOTTOM, 0);
-        set.connect(enterButton.getId(), ConstraintSet.LEFT, leftWall, ConstraintSet.RIGHT, keyMargin);
+        set.connect(enterButton.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT, keyMargin);
         set.connect(enterButton.getId(), ConstraintSet.RIGHT, key[19].getId(), ConstraintSet.LEFT, keyMargin);
         set.setHorizontalChainStyle(enterButton.getId(), ConstraintSet.CHAIN_PACKED);
         set.connect(delButton.getId(), ConstraintSet.TOP, key[25].getId(), ConstraintSet.TOP, 0);
