@@ -62,7 +62,7 @@ public class TilePair implements Parcelable {
     }
 
     public void set(char keyCharacter, int statusId) throws InvalidParameterException {
-        if ('A' < keyCharacter && keyCharacter < 'Z') {
+        if ('A' <= keyCharacter && keyCharacter <= 'Z') {
             this.keyCharacter = (byte) keyCharacter;
             this.statusId = statusId;
         } else {
