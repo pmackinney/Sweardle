@@ -28,13 +28,10 @@ public class MainViewModel extends AndroidViewModel {
     private boolean WINNER = false;
     private String gameWord;
 
-    public MainViewModel(@NonNull Context context, Bundle savedInstanceState) {
-        super();
-        this.dict = context.getResources().getStringArray(R.array.dict);
-        this.words = context.getResources().getStringArray(R.array.words);
-        if (savedInstanceState != null) {
-
-        }
+    public MainViewModel(@NonNull Application application) {
+        super(application);
+        this.dict = application.getResources().getStringArray(R.array.dict);
+        this.words = application.getResources().getStringArray(R.array.words);
     }
 
     public String getGameWord() {

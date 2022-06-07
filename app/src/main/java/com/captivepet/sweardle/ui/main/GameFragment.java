@@ -80,9 +80,9 @@ public class GameFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mLayout = view.findViewById(fragment_game);
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        if (savedInstanceState != null) {
-            mViewModel set
-        }
+//        if (savedInstanceState != null) {
+//            mViewModel.unParcel(savedInstanceState);
+//        }
         mViewModel.getGameSignal().observe(getViewLifecycleOwner(), this::signalReceived);
         mainToolbar = requireActivity().findViewById(R.id.main_toolbar);
 //        mainToolbar.setTitleTextColor(R.color.white);
