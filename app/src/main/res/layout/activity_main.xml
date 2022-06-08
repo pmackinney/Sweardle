@@ -14,7 +14,7 @@
         android:id="@+id/main_toolbar"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
-        android:theme="@style/Theme.Sweardle"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
     <androidx.fragment.app.FragmentContainerView
