@@ -77,11 +77,24 @@ public class MainViewModel extends AndroidViewModel {
         return words[(int) (Math.random() * words.length)];
     }
 
+    public void deleteLastChar() {
+        if (gameboard.size() > 0) {
+            gameboard.remove(gameboard.size() - 1);
+        }
+    }
+    public TilePair getLastChar() {
+        if (gameboard.size() > 0) {
+            return gameboard.get(gameboard.size() - 1);
+        } else {
+            return null;
+        }
+    }
+
     public boolean validateGuess() {
         List<TilePair> currentRow = getCurrentRow();
         int rowsDone = gameboard.size() / GameFragment.WORD_LENGTH;
-        int position = gameboard.size() - rowsDone * GameFragment.WORD_LENGTH;
-        if (position == GameFragment.WORD_LENGTH) {
+        int guessLength = gameboard.size() - (rowsDone - 1) * GameFragment.WORD_LENGTH;
+        if (guessLength == GameFragment.WORD_LENGTH) {
             char[] guessWord = new char[GameFragment.WORD_LENGTH];
             for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) {
                 guessWord[ix] = currentRow.get(ix).getChar();

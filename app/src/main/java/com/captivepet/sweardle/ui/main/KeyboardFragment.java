@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
@@ -44,14 +45,18 @@ public class KeyboardFragment extends Fragment {
             'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
             'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
             'Z', 'X', 'C', 'V', 'B', 'N', 'M'};
+    public static final char firstLetter = 'A';
+    public static final char lastLetter = 'Z';
     public static final char BLANK = ' ';
-//    public static final char ENTER = '⏎';
-//    public static final char DEL = '⌫';
-    public static char ENTER;
-    public static char DEL;
+    public static final char ENTER = '⏎';
+    public static final char DEL = '⌫';
     private static final Button[] key = new Button[KEY_LABEL.length];
     private ImageButton enterButton;
     private ImageButton delButton;
+
+    // LiveData signals
+    public static final String UPDATE_FROM_LAST_ROW = "Update";
+    public static final String UPDATE_ALL = "Reset";
 
     public KeyboardFragment() {} // Required empty public constructor ??
     public static KeyboardFragment newInstance() { return new KeyboardFragment(); }
@@ -69,7 +74,7 @@ public class KeyboardFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mLayout = view.findViewById(R.id.fragment_keyboard);
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        mViewModel.getKeyboardSignal().observe(getViewLifecycleOwner(), this::updateKeyboard);
+        mViewModel.getKeyboardSignal().observe(getViewLifecycleOwner(), this::onSignal);
     }
 
     public int computeSizes(Point size) {
@@ -107,27 +112,31 @@ public class KeyboardFragment extends Fragment {
     }
     public void init() {
         // make the keys
-        ENTER = getString(R.string.enter_symbol).charAt(0);
         enterButton = new ImageButton(getContext());
         enterButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
         enterButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_keyboard_return_24));
-        enterButton.setTag(getString(R.string.enter_symbol));
-        setCommonProperties(enterButton);
+        enterButton.setId(View.generateViewId());
+        enterButton.setOnClickListener(view -> mViewModel.getGameSignal().setValue(String.valueOf(ENTER)));
+        mLayout.addView(enterButton);
 
-        DEL = getString(R.string.del_symbol).charAt(0);
         delButton = new ImageButton(getContext());
         delButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
         delButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_undo_24));
-        delButton.setTag(getString(R.string.del_symbol));
-        setCommonProperties(delButton);
+        delButton.setId(View.generateViewId());
+        delButton.setOnClickListener(view -> mViewModel.getGameSignal().setValue(String.valueOf(DEL)));
+        mLayout.addView(delButton);
 
         for (int ix = 0; ix < key.length; ix++) {
             Button k;
             k = new Button(mLayout.getContext());
-            setCommonProperties(k);
+            k.setId(View.generateViewId());
+            k.setText(String.format(Locale.US, "%c", KEY_LABEL[ix]));
+            final String msg = String.valueOf(KEY_LABEL[ix]);
+            k.setOnClickListener(view -> mViewModel.getGameSignal().setValue(msg));
+            mLayout.addView(k);
             k.setMaxLines(1);
             k.setGravity(Gravity.CENTER);
-            k.setText(String.format(Locale.US, "%c", KEY_LABEL[ix]));
+
             k.setTag(TilePair.UNCHECKED);
             k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
             key[ix] = k;
@@ -240,12 +249,6 @@ public class KeyboardFragment extends Fragment {
         set.applyTo(mLayout);
     }
 
-    public void setCommonProperties(View button) {
-        button.setId(View.generateViewId());
-        button.setOnClickListener(view -> mViewModel.onKeyboard(view));
-        mLayout.addView(button);
-    }
-
     public static int keyLookup(char c) {
         for (int ix = 0; ix < KEY_LABEL.length; ix++) {
             if (KEY_LABEL[ix] == c) {
@@ -286,15 +289,15 @@ public class KeyboardFragment extends Fragment {
         set.applyTo(mLayout);
     }
 
-    private void updateKeyboard(@NonNull String signal) {
-        if (signal.equals(GameFragment.RESET)) {
+    private void onSignal(@NonNull String signal) {
+        if (signal.equals(UPDATE_ALL)) {
             for (View k : key) {
                 k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
             }
-        } else if (signal.equals(GameFragment.ROW_UPDATED)) {
+        } else if (signal.equals(UPDATE_FROM_LAST_ROW)) {
             for (TilePair guess : mViewModel.getCurrentRow()) {
-                int guessStatus = guess.getD();
-                Button mKey = key[keyLookup(guess.getC())];
+                int guessStatus = guess.getStatus();
+                Button mKey = key[keyLookup(guess.getChar())];
                 int keyStatus = (int) mKey.getTag();
                 if (keyStatus == TilePair.MISPLACED || keyStatus == TilePair.UNCHECKED) {
                     if (guessStatus == TilePair.CORRECT) {

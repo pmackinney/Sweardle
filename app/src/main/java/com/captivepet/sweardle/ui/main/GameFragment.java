@@ -25,7 +25,7 @@ import android.widget.Button;
 import android.widget.Toast;
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
-import java.util.ArrayList;
+import java.util.List;
 
 
 public class GameFragment extends Fragment {
@@ -40,6 +40,8 @@ public class GameFragment extends Fragment {
     public final static int WORD_LENGTH = 5;
     public final static char EMPTY = ' ';
     public static final String BAD_WORD = "Guess not in dict";
+
+    private boolean GUESS_TESTED;
 
     // LiveData signals
     public static final String ADD_CHAR = "Add one char";
@@ -69,7 +71,7 @@ public class GameFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mLayout = view.findViewById(fragment_game);
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        mViewModel.getGameSignal().observe(getViewLifecycleOwner(), this::signalReceived);
+        mViewModel.getGameSignal().observe(getViewLifecycleOwner(), this::onSignal);
         mainToolbar = requireActivity().findViewById(R.id.main_toolbar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(mainToolbar);
 
@@ -105,32 +107,59 @@ public class GameFragment extends Fragment {
         }
     }
 
-    public void signalReceived(String signal) {
-        if (BAD_WORD.equals(signal)) {
-            badWordAlert();
-        } else if (RESET.equals(signal)) {
-            resetTiles();
-        } else if (WINNER.equals(signal)) {
-            newGameQuery(getString(R.string.congratulations));
-        } else if (LOSER.equals(signal)) {
-            newGameQuery(String.format(getString(R.string.taunt), mViewModel.getGameWord()));
-        } else {
-            ArrayList<TilePair> row = mViewModel.getCurrentRow(); //(ArrayList<TilePair>) mViewModel.getCurrentRow().clone();
-            int startOfRow = mViewModel.getRowsDone() * WORD_LENGTH;
-            if (ADD_CHAR.equals(signal)) {
-                setTile(startOfRow + row.size() - 1,
-                            row.get(row.size() - 1).getC(),
-                            AppCompatResources.getDrawable(requireContext(), row.get(row.size() - 1).getD())
-                );
-            } else if (ROW_UPDATED.equals(signal)) {
-                for (int ix = 0; ix < WORD_LENGTH; ix++) { // redraw row to set highlights
-                    char c = row.get(ix).getC();
-                    Drawable d = AppCompatResources.getDrawable(requireContext(), row.get(ix).getD());
-                    setTile(startOfRow + ix, c, d);
+    public void onSignal(String signal) {
+        switch (signal) {
+            case BAD_WORD:
+
+                break;
+            case WINNER:
+
+                break;
+            case LOSER:
+
+                break;
+            default:
+                processChar(signal);
+        }
+    }
+
+    private void processChar(String s) {
+        if (s.length() != 1) {
+            return;
+        }
+        char keyChar = s.charAt(0);
+        switch(keyChar) {
+            case KeyboardFragment.ENTER:
+                if (mViewModel.getCurrentRow().size() == WORD_LENGTH && !GUESS_TESTED) {
+                    if (mViewModel.validateGuess()) {
+                        boolean WINNER = mViewModel.testWord();
+                        GUESS_TESTED = true;
+                        for (int ix = mViewModel.getPosition() - WORD_LENGTH; ix < mViewModel.getPosition(); ix++) {
+                            setTile(ix, mViewModel.get(ix).getChar(), mViewModel.get(ix).getStatus());
+                        }
+                        mViewModel.getKeyboardSignal().setValue(KeyboardFragment.UPDATE_FROM_LAST_ROW);
+                        if (WINNER) {
+                            newGameQuery(getString(R.string.congratulations));
+                        } else if (mViewModel.getRowsDone() == ROW_COUNT) {
+                            newGameQuery(String.format(getString(R.string.taunt), mViewModel.getSolution()));
+                        }
+                    } else {
+                        badWordAlert();
+                    }
                 }
-            } else if (DEL.equals(signal)) {
-                setTile(startOfRow + row.size(), EMPTY, AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
-            }
+                break;
+            case KeyboardFragment.DEL:
+                if (mViewModel.getPosition() > 0 && mViewModel.getLastChar().getStatus() == TilePair.UNCHECKED) {
+                    mViewModel.deleteLastChar(); // position - 1
+                    setTile(mViewModel.getPosition(), EMPTY, TilePair.UNCHECKED);
+                }
+                break;
+            default:
+                if (KeyboardFragment.firstLetter <= keyChar && keyChar<= KeyboardFragment.lastLetter) {
+                    setTile(mViewModel.getPosition(), keyChar, TilePair.UNCHECKED);
+                    mViewModel.addChar(keyChar);
+                    GUESS_TESTED = false;
+                }
         }
     }
 
@@ -222,14 +251,14 @@ public class GameFragment extends Fragment {
 
     public void resetTiles() {
         for (int ix = 0; ix < tile.length; ix++) {
-            setTile(ix, GameFragment.EMPTY, AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
+            setTile(ix, GameFragment.EMPTY, TilePair.UNCHECKED);
         }
         rowUpdated = false;
     }
 
-    public void setTile(int ix, char c, Drawable d) {
+    public void setTile(int ix, char c, int d) {
         tile[ix].setText(String.format("%c", c));
-        tile[ix].setBackground(d);
+        tile[ix].setBackground(AppCompatResources.getDrawable(requireContext(), d));
         rowUpdated = false;
     }
 
