@@ -20,15 +20,13 @@
     <androidx.fragment.app.FragmentContainerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/main_fragment"
-        android:layout_gravity="top"
+        android:id="@+id/game_fragment"
         android:layout_weight="0.5"
         tools:layout="@layout/fragment_game" />
 
     <androidx.fragment.app.FragmentContainerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
         android:id="@+id/keyboard_fragment"
         android:layout_weight="0.5"
         tools:layout="@layout/fragment_keyboard" />

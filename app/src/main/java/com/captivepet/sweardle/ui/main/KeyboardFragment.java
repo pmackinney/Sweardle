@@ -79,28 +79,21 @@ public class KeyboardFragment extends Fragment {
 
     public int computeSizes(Point size) {
         int keyboardHeight, keyboardWidth, gameboardSize;
-        int PORTRAIT = 0;
-        int LANDSCAPE = 1;
-        int keyboardOrientation;
         if (size.y >= size.x) { // portrait
             keyboardWidth = size.x;
             keyWidth = keyboardWidth / KEY_WIDTH_DIVISOR;
             keyMargin = keyWidth / KEY_MARGIN_DIVISOR;
             keyboardHeight = Math.max(size.y - size.x, 4 * keyWidth);
             keyHeight = Math.min(keyboardHeight / 4, (int) (MAX_KEY_HEIGHT_RATIO * keyWidth));
-//            keyboardWeight = (float) keyboardHeight / size.y;
             gameboardSize = size.y - keyboardHeight;
         } else { // landscape
             gameboardSize = (int) Math.min(size.x - size.y, size.x / 2f);
-            keyboardWeight = size.x - (gameboardSize / (float) size.x);
-//            gameboardSize += 1 - keyboardWeight;
             keyboardWidth = size.x - gameboardSize;
+            keyboardWeight = 1.0f - (gameboardSize / (float) size.x);
             keyWidth = keyboardWidth / KEY_WIDTH_DIVISOR;
             keyMargin = 1;
             keyHeight = (int) (MAX_KEY_HEIGHT_RATIO * keyWidth);
         }
-//        newTotalWeight = 0.5f / (1 - keyboardWeight);
-//        newKeyboardWeight = keyboardWeight * newTotalWeight;
         return gameboardSize;
     }
 
@@ -155,7 +148,7 @@ public class KeyboardFragment extends Fragment {
 
             // top & bottom constraints
             if (ix == 0) {
-                set.setVerticalChainStyle(id, ConstraintSet.CHAIN_SPREAD);
+                set.setVerticalChainStyle(id, ConstraintSet.CHAIN_PACKED);
                 top = ConstraintSet.PARENT_ID;
                 topS = ConstraintSet.TOP;
                 topM = keyHeight / 2;

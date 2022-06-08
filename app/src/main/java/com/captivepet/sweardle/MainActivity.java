@@ -1,13 +1,12 @@
 package com.captivepet.sweardle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Size;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -18,7 +17,7 @@ import com.captivepet.sweardle.ui.main.KeyboardFragment;
 
 public class MainActivity extends AppCompatActivity {
     public Size windowSize;
-    GameFragment tile;
+    GameFragment game;
     KeyboardFragment keyboard;
     ViewGroup container;
 
@@ -26,6 +25,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (savedInstanceState == null) {
+            keyboard = KeyboardFragment.newInstance();
+            getSupportFragmentManager().beginTransaction().replace(
+                    R.id.keyboard_fragment, keyboard).commitNow();
+            game = GameFragment.newInstance();
+            getSupportFragmentManager().beginTransaction().replace(
+                    R.id.game_fragment, game).commitNow();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        GameFragment game = (GameFragment) getSupportFragmentManager().findFragmentById(R.id.game_fragment);
+        KeyboardFragment keyboard = (KeyboardFragment) getSupportFragmentManager().findFragmentById(R.id.keyboard_fragment);
         container = findViewById(R.id.container);
 
         View parent = (View) container.getParent();
@@ -33,21 +47,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onGlobalLayout() {
                 parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                game.setSize(getDisplayContentHeight());
                 int gameSize = keyboard.computeSizes(getDisplayContentHeight());
                 keyboard.init();
-                tile.init(gameSize);
-                tile.resetTiles();
+//                game.init(gameSize);
+//                game.resetTiles();
             }
         });
-
-        if (savedInstanceState == null) {
-            keyboard = KeyboardFragment.newInstance();
-            getSupportFragmentManager().beginTransaction().replace(
-                    R.id.keyboard_fragment, keyboard).commitNow();
-            tile = GameFragment.newInstance();
-            getSupportFragmentManager().beginTransaction().replace(
-                    R.id.main_fragment, tile).commitNow();
-        }
+        super.onResume();
     }
 
     // https://gist.github.com/dominicthomas/8257203

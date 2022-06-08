@@ -8,7 +8,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.appcompat.app.AlertDialog;
-import android.graphics.drawable.Drawable;
+
+import android.graphics.Point;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,11 +26,11 @@ import android.widget.Button;
 import android.widget.Toast;
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
-import java.util.List;
 
 
 public class GameFragment extends Fragment {
 
+    private Point size;
     private ConstraintLayout mLayout;
     private MainViewModel mViewModel;
     private Toolbar mainToolbar;
@@ -74,16 +75,25 @@ public class GameFragment extends Fragment {
         mViewModel.getGameSignal().observe(getViewLifecycleOwner(), this::onSignal);
         mainToolbar = requireActivity().findViewById(R.id.main_toolbar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(mainToolbar);
+    }
 
+    @Override
+    public void onResume() {
         // called this way to ensure that KeyboardFragment as finished init()
         View parent = (View) mLayout.getParent();
         parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                mViewModel.newGame();
+                if (mViewModel.getPosition() == 0) {
+                    mViewModel.newGame();
+
+                }
+                init(Math.min(size.x, size.y));
+                updateAllTiles();
             }
         });
+        super.onResume();
     }
 
     @Override
@@ -105,6 +115,10 @@ public class GameFragment extends Fragment {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void setSize(Point s) {
+        this.size = s;
     }
 
     public void onSignal(String signal) {
@@ -249,14 +263,21 @@ public class GameFragment extends Fragment {
         set.applyTo(mLayout);
     }
 
-    public void resetTiles() {
-        for (int ix = 0; ix < tile.length; ix++) {
+    public void updateAllTiles() {
+        int last = mViewModel.getPosition();
+        for (int ix = 0; ix < last; ix++) {
+            TilePair tp = mViewModel.get(ix);
+            setTile(ix, tp.getChar(), tp.getStatus());
+        }
+        for (int ix = last; ix < WORD_LENGTH * ROW_COUNT; ix++) {
             setTile(ix, GameFragment.EMPTY, TilePair.UNCHECKED);
         }
-        rowUpdated = false;
     }
 
     public void setTile(int ix, char c, int d) {
+        if (tile == null || tile[ix] == null) {
+            return;
+        }
         tile[ix].setText(String.format("%c", c));
         tile[ix].setBackground(AppCompatResources.getDrawable(requireContext(), d));
         rowUpdated = false;
@@ -269,9 +290,7 @@ public class GameFragment extends Fragment {
         builder.setMessage(message);
         builder.setPositiveButton(getString(R.string.new_game),
             (dialog, id) -> {
-                resetTiles();
-                mViewModel.getKeyboardSignal().setValue(RESET);
-                mViewModel.newGame();
+                newGame();
             });
         builder.setNegativeButton(getString(R.string.cancel),
             (dialog, id) -> dialog.dismiss());
@@ -301,8 +320,8 @@ public class GameFragment extends Fragment {
     }
 
     public void newGame() {
-        resetTiles();
-        mViewModel.getKeyboardSignal().setValue(RESET);
         mViewModel.newGame();
+        updateAllTiles();
+        mViewModel.getKeyboardSignal().setValue(RESET);
     }
 }

@@ -14,7 +14,7 @@ public class TilePair {
     public final static int UNCHECKED = R.drawable.frame_white;
     public final static int INCORRECT = R.drawable.frame_grey;
     public final static int CORRECT = R.drawable.frame_green;
-    public final static int MISPLACED = R.drawable.frame_ochre;
+    public final static int MISPLACED = R.drawable.frame_ochre; //0824
 
     public TilePair() {
         c = GameFragment.EMPTY;

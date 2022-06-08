@@ -70,7 +70,8 @@ public class MainViewModel extends AndroidViewModel {
 
     public void newGame() {
         gameboard.clear();
-        solution = getNewGameWord();
+//        solution = getNewGameWord();
+        solution = "STEED";
     }
 
     private String getNewGameWord() {
@@ -115,6 +116,7 @@ public class MainViewModel extends AndroidViewModel {
         TilePair[] guess = new TilePair[GameFragment.WORD_LENGTH];
         List<TilePair> currentRow = getCurrentRow();
         char[] word = solution.toCharArray();
+
         for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) { // find all correct letters
             guess[ix] = currentRow.get(currentRow.size() - GameFragment.WORD_LENGTH + ix);
             if (word[ix] == guess[ix].getChar()) {
