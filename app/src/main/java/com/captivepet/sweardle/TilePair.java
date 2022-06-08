@@ -1,5 +1,11 @@
 package com.captivepet.sweardle;
 
+import com.captivepet.sweardle.ui.main.GameFragment;
+
+import java.util.ArrayList;
+
+import kotlin.UNumbersKt;
+
 // https://alvinalexander.com/java/java-tuple-classes/
 public class TilePair {
     private char c;
@@ -10,20 +16,27 @@ public class TilePair {
     public final static int CORRECT = R.drawable.frame_green;
     public final static int MISPLACED = R.drawable.frame_ochre;
 
+    public TilePair() {
+        c = GameFragment.EMPTY;
+        d = UNCHECKED;
+    }
+
     public TilePair(char c, int d) {
         setPair(c, d);
     }
 
-    public char getC() {
+    public char getChar() {
         return c;
     }
 
-    public int getD() {
+    public int getStatus() {
         return d;
     }
 
-    public void setD(int d) {
-        this.d = d;
+    public void setStatus(int d) {
+        if (d == UNCHECKED || d == INCORRECT || d == CORRECT || d == MISPLACED) {
+            this.d = d;
+        }
     }
 
     public void setPair(char c, int d) {
