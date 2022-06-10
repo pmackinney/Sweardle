@@ -6,6 +6,9 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.appcompat.app.AlertDialog;
 
@@ -28,7 +31,7 @@ import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
 
 
-public class GameFragment extends Fragment {
+public class GameFragment extends Fragment implements LifecycleOwner {
 
     private Point size;
     private ConstraintLayout mLayout;
@@ -72,7 +75,6 @@ public class GameFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mLayout = view.findViewById(fragment_game);
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        mViewModel.getGameSignal().observe(getViewLifecycleOwner(), this::onSignal);
         mainToolbar = requireActivity().findViewById(R.id.main_toolbar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(mainToolbar);
     }
@@ -144,14 +146,13 @@ public class GameFragment extends Fragment {
         char keyChar = s.charAt(0);
         switch(keyChar) {
             case KeyboardFragment.ENTER:
-                if (mViewModel.getCurrentRow().size() == WORD_LENGTH && !GUESS_TESTED) {
+                if (mViewModel.getGuessWord().size() == WORD_LENGTH && !GUESS_TESTED) {
                     if (mViewModel.validateGuess()) {
                         boolean WINNER = mViewModel.testWord();
                         GUESS_TESTED = true;
                         for (int ix = mViewModel.getPosition() - WORD_LENGTH; ix < mViewModel.getPosition(); ix++) {
-                            setTile(ix, mViewModel.get(ix).getChar(), mViewModel.get(ix).getStatus());
+                            setTile(ix, mViewModel.getTileChar(ix), mViewModel.getTileStatus(ix));
                         }
-                        mViewModel.getKeyboardSignal().setValue(KeyboardFragment.UPDATE_FROM_LAST_ROW);
                         if (WINNER) {
                             newGameQuery(getString(R.string.congratulations));
                         } else if (mViewModel.getRowsDone() == ROW_COUNT) {
@@ -163,7 +164,7 @@ public class GameFragment extends Fragment {
                 }
                 break;
             case KeyboardFragment.DEL:
-                if (mViewModel.getPosition() > 0 && mViewModel.getLastChar().getStatus() == TilePair.UNCHECKED) {
+                if (mViewModel.getPosition() > 0 && mViewModel.getTileStatus(mViewModel.getPosition() - 1) == TilePair.UNCHECKED) {
                     mViewModel.deleteLastChar(); // position - 1
                     setTile(mViewModel.getPosition(), EMPTY, TilePair.UNCHECKED);
                 }
@@ -266,8 +267,7 @@ public class GameFragment extends Fragment {
     public void updateAllTiles() {
         int last = mViewModel.getPosition();
         for (int ix = 0; ix < last; ix++) {
-            TilePair tp = mViewModel.get(ix);
-            setTile(ix, tp.getChar(), tp.getStatus());
+            setTile(ix, mViewModel.getTileChar(ix), mViewModel.getTileStatus(ix));
         }
         for (int ix = last; ix < WORD_LENGTH * ROW_COUNT; ix++) {
             setTile(ix, GameFragment.EMPTY, TilePair.UNCHECKED);
@@ -321,7 +321,5 @@ public class GameFragment extends Fragment {
 
     public void newGame() {
         mViewModel.newGame();
-        updateAllTiles();
-        mViewModel.getKeyboardSignal().setValue(RESET);
     }
 }

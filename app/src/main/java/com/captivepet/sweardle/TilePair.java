@@ -17,8 +17,7 @@ public class TilePair {
     public final static int MISPLACED = R.drawable.frame_ochre; //0824
 
     public TilePair() {
-        c = GameFragment.EMPTY;
-        d = UNCHECKED;
+        setPair(GameFragment.EMPTY, UNCHECKED);
     }
 
     public TilePair(char c, int d) {

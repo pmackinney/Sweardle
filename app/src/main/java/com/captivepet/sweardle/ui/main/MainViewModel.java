@@ -1,9 +1,12 @@
 package com.captivepet.sweardle.ui.main;
 
 import android.app.Application;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +16,9 @@ import com.captivepet.sweardle.R;
 public class MainViewModel extends AndroidViewModel {
     private final String TAG = getClass().getSimpleName();
 
-    /**
-     * LiveData ignals are fielded by the target's onSignal(signal) handler.
-     */
-    private MutableLiveData<String> keyboardSignal;
-    private MutableLiveData<String> gameSignal;
+    // new
+    private final MutableLiveData<List<TilePair>> gameboard = new MutableLiveData<>();
 
-    final private ArrayList<TilePair> gameboard = new ArrayList<>();
     private final String[] dict;
     private final String[] words;
     private String solution;
@@ -34,44 +33,47 @@ public class MainViewModel extends AndroidViewModel {
         return solution;
     }
 
-    public List<TilePair> getCurrentRow() {
-        int end = gameboard.size();
+    /**
+     * Returns the current guess, e.g., the last complete row of the gameboard.
+     * @return
+     */
+    public List getGuessWord() {
+        ArrayList<Character> guessWord = new ArrayList<Character>(5);
+        int position = getValue().size();
         int rowsDone = getRowsDone();
-        if (rowsDone == 0) {
-            return gameboard;
-        } else if (end % GameFragment.WORD_LENGTH == 0) {
-            return(gameboard.subList((rowsDone - 1) * GameFragment.WORD_LENGTH, end));
+        if (rowsDone > 0 && position % GameFragment.WORD_LENGTH == 0) {
+            for (int ix = position - GameFragment.WORD_LENGTH; ix < position; ix++) {
+                guessWord.add(getTileChar(ix));
+            }
+            return guessWord;
         } else {
-            return gameboard.subList(rowsDone * GameFragment.WORD_LENGTH, gameboard.size());
+            return null;
         }
     }
 
-    public List<TilePair> getGameboard() {
-        return gameboard;
+    private List<TilePair> getValue() {
+        if (gameboard.getValue() == null) {
+            gameboard.setValue(new ArrayList<>(GameFragment.WORD_LENGTH * GameFragment.ROW_COUNT));
+        }
+        return gameboard.getValue();
     }
 
+    public char getTileChar(int ix) {
+        return getValue().get(ix).getChar();
+    }
+
+    public int getTileStatus(int ix) {
+        return getValue().get(ix).getStatus();
+    }
     public int getRowsDone() {
-        return gameboard.size() / GameFragment.WORD_LENGTH;
+        return getValue().size() / GameFragment.WORD_LENGTH;
     }
 
-    public MutableLiveData<String> getKeyboardSignal() {
-        if (keyboardSignal == null) {
-            keyboardSignal = new MutableLiveData<>();
-        }
-        return keyboardSignal;
-    }
-
-    public MutableLiveData<String> getGameSignal() {
-        if (gameSignal == null) {
-            gameSignal = new MutableLiveData<>();
-        }
-        return gameSignal;
-    }
 
     public void newGame() {
-        gameboard.clear();
-//        solution = getNewGameWord();
-        solution = "STEED";
+        gameboard.getValue().clear();
+        solution = getNewGameWord();
+//        solution = "STEED"; // TODO
     }
 
     private String getNewGameWord() {
@@ -79,22 +81,18 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void deleteLastChar() {
-        if (gameboard.size() > 0) {
-            gameboard.remove(gameboard.size() - 1);
+        if (getValue().size() > 0) {
+            getValue().remove(getValue().size() - 1);
         }
     }
-    public TilePair getLastChar() {
-        if (gameboard.size() > 0) {
-            return gameboard.get(gameboard.size() - 1);
-        } else {
-            return null;
-        }
+    public char getLastChar() {
+        return getTileChar(getValue().size() - 1);
     }
 
     public boolean validateGuess() {
-        List<TilePair> currentRow = getCurrentRow();
-        int rowsDone = gameboard.size() / GameFragment.WORD_LENGTH;
-        int guessLength = gameboard.size() - (rowsDone - 1) * GameFragment.WORD_LENGTH;
+        List<TilePair> currentRow = getGuessWord();
+        int rowsDone = getValue().size() / GameFragment.WORD_LENGTH;
+        int guessLength = getValue().size() - (rowsDone - 1) * GameFragment.WORD_LENGTH;
         if (guessLength == GameFragment.WORD_LENGTH) {
             char[] guessWord = new char[GameFragment.WORD_LENGTH];
             for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) {
@@ -114,7 +112,7 @@ public class MainViewModel extends AndroidViewModel {
 
     public boolean testWord() {
         TilePair[] guess = new TilePair[GameFragment.WORD_LENGTH];
-        List<TilePair> currentRow = getCurrentRow();
+        List<TilePair> currentRow = getGuessWord();
         char[] word = solution.toCharArray();
 
         for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) { // find all correct letters
@@ -137,6 +135,7 @@ public class MainViewModel extends AndroidViewModel {
                 }
             }
         }
+
         for (int jx = 0; jx < GameFragment.WORD_LENGTH; jx++) { // the rest are wrong
         if (guess[jx].getStatus() == TilePair.UNCHECKED) {
             guess[jx].setStatus(TilePair.INCORRECT);
@@ -146,17 +145,13 @@ public class MainViewModel extends AndroidViewModel {
         return WIN;
 }
 
-    public TilePair get(int ix) {
-        return gameboard.get(ix);
-    }
-
     public int getPosition() {
-        return gameboard.size();
+        return getValue().size();
     }
 
     public void addChar(char k) {
-        if (gameboard.size() < GameFragment.WORD_LENGTH * GameFragment.ROW_COUNT) {
-            gameboard.add(new TilePair(k, TilePair.UNCHECKED));
+        if (getValue().size() < GameFragment.WORD_LENGTH * GameFragment.ROW_COUNT) {
+            getValue().add(new TilePair(k, TilePair.UNCHECKED));
         }
     }
 }

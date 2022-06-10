@@ -18,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
@@ -288,7 +287,7 @@ public class KeyboardFragment extends Fragment {
                 k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
             }
         } else if (signal.equals(UPDATE_FROM_LAST_ROW)) {
-            for (TilePair guess : mViewModel.getCurrentRow()) {
+            for (TilePair guess : mViewModel.getGuessWord()) {
                 int guessStatus = guess.getStatus();
                 Button mKey = key[keyLookup(guess.getChar())];
                 int keyStatus = (int) mKey.getTag();
