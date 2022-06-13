@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +32,7 @@ import java.util.Locale;
  * Builds the keyboard which never changes
  */
 public class KeyboardFragment extends Fragment {
+    private final String TAG = this.getClass().getSimpleName();
 
     private MainViewModel mViewModel;
     private ConstraintLayout mLayout;
@@ -302,7 +304,6 @@ public class KeyboardFragment extends Fragment {
         set.applyTo(mLayout);
     }
 
-    int testy;
     /**
      * Update the key highlights. Only need to check the last row as
      * completed rows are implicitly immutable.
@@ -311,17 +312,22 @@ public class KeyboardFragment extends Fragment {
     private void onChanged(List<TilePair> gameboard) {
         int start = mViewModel.getRowsDone();
         int end = mViewModel.getPosition();
+        Log.d(TAG, "start, end = " + start + ", " + end);
+        Log.d(TAG, "subList.size() = " + gameboard.subList(start, end).size());
         for (TilePair guess : gameboard.subList(start, end)) {
-            testy = keyLookup(guess.getChar());
             Button mKey = key[keyLookup(guess.getChar())];
             int guessStatus = guess.getStatus();
             int keyStatus = (int) mKey.getTag();
+
             if (keyStatus == TilePair.MISPLACED || keyStatus == TilePair.UNCHECKED) {
                 if (guessStatus == TilePair.CORRECT) {
                     setKeyStatus(mKey, TilePair.CORRECT);
+                    Log.d(TAG, TilePair.getStatusName(keyStatus) + " -> " + TilePair.getStatusName(TilePair.CORRECT));
                 } else if (guessStatus == TilePair.MISPLACED && keyStatus != TilePair.MISPLACED) {
                     setKeyStatus(mKey, TilePair.MISPLACED);
+                    Log.d(TAG, TilePair.getStatusName(keyStatus) + " -> " + TilePair.getStatusName(TilePair.MISPLACED));
                 } else if (guessStatus == TilePair.INCORRECT) {
+                    Log.d(TAG, TilePair.getStatusName(keyStatus) + " -> " + TilePair.getStatusName(TilePair.INCORRECT));
                     setKeyStatus(mKey, TilePair.INCORRECT);
                 }
             }
