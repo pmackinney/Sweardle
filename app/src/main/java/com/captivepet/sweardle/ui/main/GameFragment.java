@@ -1,5 +1,6 @@
 package com.captivepet.sweardle.ui.main;
 
+import static android.content.ContentValues.TAG;
 import static com.captivepet.sweardle.R.id.fragment_game;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -15,6 +16,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,6 +35,7 @@ import java.util.List;
 
 
 public class GameFragment extends Fragment implements LifecycleOwner {
+    private final String tag = this.getClass().getSimpleName();
 
     private Point size;
     private ConstraintLayout mLayout;
@@ -119,17 +123,22 @@ public class GameFragment extends Fragment implements LifecycleOwner {
         this.size = s;
     }
 
-    int position, start, end, ix;
+    /**
+     * Redraw the last row of the gameboard
+     * @param pairList - LiveData object that triggers this method
+     */
     public void onChanged(List<TilePair> pairList) {
-         position = pairList.size();
-         start = (position / WORD_LENGTH) * WORD_LENGTH;
+        int position = pairList.size();
+        int start = (position / WORD_LENGTH) * WORD_LENGTH;
         if (start > 0 && position % WORD_LENGTH == 0) {
             start -= WORD_LENGTH;
         }
-         end = position - start;
-        for ( ix = start; ix < end; ix++) {
+        for (int ix = start; ix < position; ix++) {
             tile[ix].setText(String.format("%c", mViewModel.getTileChar(ix)));
             tile[ix].setBackground(AppCompatResources.getDrawable(requireContext(), mViewModel.getTileStatus(ix)));
+        }
+        if (position < WORD_LENGTH * ROW_COUNT) {
+            setDefault(tile[position]);
         }
     }
 
@@ -157,7 +166,11 @@ public class GameFragment extends Fragment implements LifecycleOwner {
         case KeyboardFragment.DEL:
             TilePair tp = mViewModel.getLastChar();
             if (tp != null && tp.getStatus() == TilePair.UNCHECKED) {
-                mViewModel.deleteLastChar(); // position - 1
+                Log.d(TAG, String.format("tp = %c, %s", tp.getChar(), TilePair.getStatusName(tp.getStatus())));
+                mViewModel.deleteLastChar();
+                if (mViewModel.getPosition() % WORD_LENGTH == 0) {
+                    GUESS_TESTED = true;
+                }
             }
             break;
         default:
@@ -170,6 +183,13 @@ public class GameFragment extends Fragment implements LifecycleOwner {
         }
     }
 
+    private void setDefault(Button t) {
+        if (t != null) {
+            t.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
+            t.setText(String.valueOf(KeyboardFragment.BLANK));
+        }
+    }
+
     public void init(int height) {
         int tileSize = height / (WORD_LENGTH + TILE_WIDTH_ADJUST);
         // make all the tiles;
@@ -178,7 +198,7 @@ public class GameFragment extends Fragment implements LifecycleOwner {
             mLayout.addView(k);
             k.setId(View.generateViewId());
             k.setTextColor(AppCompatResources.getColorStateList(requireContext(), R.color.black));
-            k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
+            setDefault(k);
             tile[ix] = k;
         }
         ConstraintSet set = new ConstraintSet();
