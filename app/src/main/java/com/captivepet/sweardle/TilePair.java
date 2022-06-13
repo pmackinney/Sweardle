@@ -16,6 +16,21 @@ public class TilePair {
     public final static int CORRECT = R.drawable.frame_green;
     public final static int MISPLACED = R.drawable.frame_ochre; //0824
 
+    /**
+     * for debugging
+     * @param r - the resource ID
+     * @return A status name
+     */
+    public static String getStatusName(int r) {
+        switch(r) {
+            case UNCHECKED: return "UNCHECKED";
+            case INCORRECT: return "INCORRECT";
+            case CORRECT: return "CORRECT";
+            case MISPLACED: return "MISPLACED";
+            default: return "BUMMER";
+        }
+    }
+
     public TilePair() {
         setPair(GameFragment.EMPTY, UNCHECKED);
     }

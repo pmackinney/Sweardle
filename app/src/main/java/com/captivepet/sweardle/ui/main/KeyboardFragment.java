@@ -310,29 +310,38 @@ public class KeyboardFragment extends Fragment {
      * @param gameboard - the array of TilePairs
      */
     private void onChanged(List<TilePair> gameboard) {
-        int start = mViewModel.getRowsDone();
-        int end = mViewModel.getPosition();
-        Log.d(TAG, "start, end = " + start + ", " + end);
-        Log.d(TAG, "subList.size() = " + gameboard.subList(start, end).size());
-        for (TilePair guess : gameboard.subList(start, end)) {
-            Button mKey = key[keyLookup(guess.getChar())];
-            int guessStatus = guess.getStatus();
-            int keyStatus = (int) mKey.getTag();
-
-            if (keyStatus == TilePair.MISPLACED || keyStatus == TilePair.UNCHECKED) {
-                if (guessStatus == TilePair.CORRECT) {
-                    setKeyStatus(mKey, TilePair.CORRECT);
-                    Log.d(TAG, TilePair.getStatusName(keyStatus) + " -> " + TilePair.getStatusName(TilePair.CORRECT));
-                } else if (guessStatus == TilePair.MISPLACED && keyStatus != TilePair.MISPLACED) {
-                    setKeyStatus(mKey, TilePair.MISPLACED);
-                    Log.d(TAG, TilePair.getStatusName(keyStatus) + " -> " + TilePair.getStatusName(TilePair.MISPLACED));
-                } else if (guessStatus == TilePair.INCORRECT) {
-                    Log.d(TAG, TilePair.getStatusName(keyStatus) + " -> " + TilePair.getStatusName(TilePair.INCORRECT));
-                    setKeyStatus(mKey, TilePair.INCORRECT);
+        if (mViewModel.getPosition() % GameFragment.WORD_LENGTH == 0) { // only update on complete rows
+            for (TilePair tp : mViewModel.getLastRow()) {
+                Button k = key[keyLookup(tp.getChar())];
+                int kStatus = (int) k.getTag();
+                if (kStatus == TilePair.MISPLACED || kStatus == TilePair.UNCHECKED) {
+                    setKeyStatus(k, tp.getStatus());
                 }
             }
         }
     }
+//        int start = mViewModel.getRowsDone() * GameFragment.WORD_LENGTH;
+//        int end = mViewModel.getPosition();
+//        Log.d(TAG, "start, end = " + start + ", " + end);
+//        Log.d(TAG, "subList.size() = " + gameboard.subList(start, end).size());
+//        for (TilePair guessChar : gameboard.subList(start, end)) {
+//            Button mKey = key[keyLookup(guessChar.getChar())];
+//            int guessStatus = guessChar.getStatus();
+//            int keyStatus = (int) mKey.getTag();
+//
+//            if (keyStatus == TilePair.MISPLACED || keyStatus == TilePair.UNCHECKED) {
+//                if (guessStatus == TilePair.CORRECT) {
+//                    setKeyStatus(mKey, TilePair.CORRECT);
+//                    Log.d(TAG, TilePair.getStatusName(keyStatus) + " -> " + TilePair.getStatusName(TilePair.CORRECT));
+//                } else if (guessStatus == TilePair.MISPLACED && keyStatus != TilePair.MISPLACED) {
+//                    setKeyStatus(mKey, TilePair.MISPLACED);
+//                    Log.d(TAG, TilePair.getStatusName(keyStatus) + " -> " + TilePair.getStatusName(TilePair.MISPLACED));
+//                } else if (guessStatus == TilePair.INCORRECT) {
+//                    Log.d(TAG, TilePair.getStatusName(keyStatus) + " -> " + TilePair.getStatusName(TilePair.INCORRECT));
+//                    setKeyStatus(mKey, TilePair.INCORRECT);
+//                }
+//            }
+//        }
 
     private void setKeyStatus(Button key, int status) {
         key.setBackground(AppCompatResources.getDrawable(requireContext(), status));
