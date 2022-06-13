@@ -10,6 +10,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.view.Gravity;
@@ -19,8 +20,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 
+import com.captivepet.sweardle.MainActivity;
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
+
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -73,7 +77,7 @@ public class KeyboardFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mLayout = view.findViewById(R.id.fragment_keyboard);
         mViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        mViewModel.getKeyboardSignal().observe(getViewLifecycleOwner(), this::onSignal);
+        mViewModel.getGameboard().observe(getViewLifecycleOwner(), this::onChanged);
     }
 
     public int computeSizes(Point size) {
@@ -107,15 +111,27 @@ public class KeyboardFragment extends Fragment {
         enterButton = new ImageButton(getContext());
         enterButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
         enterButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_keyboard_return_24));
+        enterButton.setTag(KeyboardFragment.ENTER);
         enterButton.setId(View.generateViewId());
-        enterButton.setOnClickListener(view -> mViewModel.getGameSignal().setValue(String.valueOf(ENTER)));
+        enterButton.setOnClickListener(new View.OnClickListener() {
+                                           @Override
+                                           public void onClick(View view) {
+                                               ((MainActivity) getActivity()).onSpecialKey(enterButton);
+                                           }
+                                       });
         mLayout.addView(enterButton);
 
         delButton = new ImageButton(getContext());
         delButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
         delButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_undo_24));
+        delButton.setTag(KeyboardFragment.DEL);
         delButton.setId(View.generateViewId());
-        delButton.setOnClickListener(view -> mViewModel.getGameSignal().setValue(String.valueOf(DEL)));
+        delButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((MainActivity) getActivity()).onSpecialKey(delButton);
+            }
+        });
         mLayout.addView(delButton);
 
         for (int ix = 0; ix < key.length; ix++) {
@@ -123,8 +139,13 @@ public class KeyboardFragment extends Fragment {
             k = new Button(mLayout.getContext());
             k.setId(View.generateViewId());
             k.setText(String.format(Locale.US, "%c", KEY_LABEL[ix]));
-            final String msg = String.valueOf(KEY_LABEL[ix]);
-            k.setOnClickListener(view -> mViewModel.getGameSignal().setValue(msg));
+            final String letter = String.valueOf(KEY_LABEL[ix]);
+            k.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ((MainActivity) getActivity()).onCharKey(k);
+                }
+            });
             mLayout.addView(k);
             k.setMaxLines(1);
             k.setGravity(Gravity.CENTER);
@@ -281,24 +302,27 @@ public class KeyboardFragment extends Fragment {
         set.applyTo(mLayout);
     }
 
-    private void onSignal(@NonNull String signal) {
-        if (signal.equals(UPDATE_ALL)) {
-            for (View k : key) {
-                k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
-            }
-        } else if (signal.equals(UPDATE_FROM_LAST_ROW)) {
-            for (TilePair guess : mViewModel.getGuessWord()) {
-                int guessStatus = guess.getStatus();
-                Button mKey = key[keyLookup(guess.getChar())];
-                int keyStatus = (int) mKey.getTag();
-                if (keyStatus == TilePair.MISPLACED || keyStatus == TilePair.UNCHECKED) {
-                    if (guessStatus == TilePair.CORRECT) {
-                        setKeyStatus(mKey, TilePair.CORRECT);
-                    } else if (guessStatus == TilePair.MISPLACED && keyStatus != TilePair.MISPLACED) {
-                        setKeyStatus(mKey, TilePair.MISPLACED);
-                    } else if (guessStatus == TilePair.INCORRECT) {
-                        setKeyStatus(mKey, TilePair.INCORRECT);
-                    }
+    int testy;
+    /**
+     * Update the key highlights. Only need to check the last row as
+     * completed rows are implicitly immutable.
+     * @param gameboard - the array of TilePairs
+     */
+    private void onChanged(List<TilePair> gameboard) {
+        int start = mViewModel.getRowsDone();
+        int end = mViewModel.getPosition();
+        for (TilePair guess : gameboard.subList(start, end)) {
+            testy = keyLookup(guess.getChar());
+            Button mKey = key[keyLookup(guess.getChar())];
+            int guessStatus = guess.getStatus();
+            int keyStatus = (int) mKey.getTag();
+            if (keyStatus == TilePair.MISPLACED || keyStatus == TilePair.UNCHECKED) {
+                if (guessStatus == TilePair.CORRECT) {
+                    setKeyStatus(mKey, TilePair.CORRECT);
+                } else if (guessStatus == TilePair.MISPLACED && keyStatus != TilePair.MISPLACED) {
+                    setKeyStatus(mKey, TilePair.MISPLACED);
+                } else if (guessStatus == TilePair.INCORRECT) {
+                    setKeyStatus(mKey, TilePair.INCORRECT);
                 }
             }
         }

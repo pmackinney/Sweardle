@@ -1,18 +1,20 @@
 package com.captivepet.sweardle.ui.main;
 
 import android.app.Application;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import com.captivepet.sweardle.TilePair;
 import com.captivepet.sweardle.R;
 
+/**
+ * Supports a LiveData array representing and array of six five-letter words.
+ * Each element is a tilePair, consisting of a char and a status (resource id).
+ */
 public class MainViewModel extends AndroidViewModel {
     private final String TAG = getClass().getSimpleName();
 
@@ -34,44 +36,51 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     /**
-     * Returns the current guess, e.g., the last complete row of the gameboard.
-     * @return
+     * Returns the last row of untested letters
+     * @return the last row
      */
-    public List getGuessWord() {
-        ArrayList<Character> guessWord = new ArrayList<Character>(5);
-        int position = getValue().size();
-        int rowsDone = getRowsDone();
-        if (rowsDone > 0 && position % GameFragment.WORD_LENGTH == 0) {
-            for (int ix = position - GameFragment.WORD_LENGTH; ix < position; ix++) {
-                guessWord.add(getTileChar(ix));
-            }
-            return guessWord;
-        } else {
-            return null;
-        }
+    public List<TilePair> getLastRow() {
+        int start = getRowsDone() * GameFragment.WORD_LENGTH;
+        int end = getPosition();
+        return getPairList().subList(start, end);
     }
 
-    private List<TilePair> getValue() {
+    public LiveData<List<TilePair>> getGameboard() {
         if (gameboard.getValue() == null) {
             gameboard.setValue(new ArrayList<>(GameFragment.WORD_LENGTH * GameFragment.ROW_COUNT));
         }
-        return gameboard.getValue();
+        return gameboard;
+    }
+
+    protected List<TilePair> getPairList() {
+        LiveData<List<TilePair>> g = getGameboard();
+        return g.getValue();
     }
 
     public char getTileChar(int ix) {
-        return getValue().get(ix).getChar();
+        return getPairList().get(ix).getChar();
     }
-
+    private void setTileStatus(int ix, int status) {
+        getPairList().get(ix).setStatus(status);
+    }
     public int getTileStatus(int ix) {
-        return getValue().get(ix).getStatus();
-    }
-    public int getRowsDone() {
-        return getValue().size() / GameFragment.WORD_LENGTH;
+        return getPairList().get(ix).getStatus();
     }
 
+    /**
+     * Returns the number of rows that have been completed and tested.
+     * @return the number of rows done
+     */
+    public int getRowsDone() {
+        int rowsDone = getPairList().size() / GameFragment.WORD_LENGTH;
+        if (rowsDone > 0 && getTileStatus(rowsDone - 1) == TilePair.UNCHECKED) {
+            rowsDone -= 1;
+        }
+        return rowsDone;
+    }
 
     public void newGame() {
-        gameboard.getValue().clear();
+        getPairList().clear();
         solution = getNewGameWord();
 //        solution = "STEED"; // TODO
     }
@@ -81,22 +90,27 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void deleteLastChar() {
-        if (getValue().size() > 0) {
-            getValue().remove(getValue().size() - 1);
+        if (getPairList().size() > 0) {
+            getPairList().remove(getPairList().size() - 1);
         }
+        gameboard.setValue(gameboard.getValue()); // alert listeners
     }
-    public char getLastChar() {
-        return getTileChar(getValue().size() - 1);
+    public TilePair getLastChar() {
+        if (getPairList().size() > 0) {
+            return getPairList().get(getPairList().size() - 1);
+        } else {
+            return null;
+        }
     }
 
     public boolean validateGuess() {
-        List<TilePair> currentRow = getGuessWord();
-        int rowsDone = getValue().size() / GameFragment.WORD_LENGTH;
-        int guessLength = getValue().size() - (rowsDone - 1) * GameFragment.WORD_LENGTH;
+        int rowsDone = getPairList().size() / GameFragment.WORD_LENGTH;
+        int rowStart = (rowsDone - 1) * GameFragment.WORD_LENGTH;
+        int guessLength = getPairList().size() - rowStart;
         if (guessLength == GameFragment.WORD_LENGTH) {
             char[] guessWord = new char[GameFragment.WORD_LENGTH];
             for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) {
-                guessWord[ix] = currentRow.get(ix).getChar();
+                guessWord[ix] = getPairList().get(rowStart + ix).getChar();
             }
             boolean VALID = false;
             for (String s : dict) {
@@ -111,47 +125,57 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public boolean testWord() {
-        TilePair[] guess = new TilePair[GameFragment.WORD_LENGTH];
-        List<TilePair> currentRow = getGuessWord();
+        int offset = getPosition() - GameFragment.WORD_LENGTH;
+        if (getCurrentRow() * GameFragment.WORD_LENGTH != offset) { // only test complete rows
+            return false;
+        }
         char[] word = solution.toCharArray();
-
         for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) { // find all correct letters
-            guess[ix] = currentRow.get(currentRow.size() - GameFragment.WORD_LENGTH + ix);
-            if (word[ix] == guess[ix].getChar()) {
-                guess[ix].setStatus(TilePair.CORRECT);
-                word[ix] = GameFragment.EMPTY;
+            if (word[ix] == getTileChar(offset + ix)) {
+                setTileStatus(ix, TilePair.CORRECT);
             }
         }
         boolean WIN = true;
         for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) { // find misplaced
-            if (word[ix] == GameFragment.EMPTY) {
-                continue;
-            }
-            for (int jx = 0; jx < GameFragment.WORD_LENGTH; jx++) {
-                if (word[ix] == guess[jx].getChar() && guess[jx].getStatus() == TilePair.UNCHECKED) {
-                    guess[jx].setStatus(TilePair.MISPLACED);
-                    WIN = false;
-                    break; // word[ix] only gets one match
+            for (int jx = offset; jx < offset + GameFragment.WORD_LENGTH; jx++) {
+                if (getTileStatus(jx) != TilePair.CORRECT && word[ix] == getTileChar(jx)) {
+                        setTileStatus(jx, TilePair.MISPLACED);
+                        WIN = false;
+                        break;
                 }
             }
         }
-
-        for (int jx = 0; jx < GameFragment.WORD_LENGTH; jx++) { // the rest are wrong
-        if (guess[jx].getStatus() == TilePair.UNCHECKED) {
-            guess[jx].setStatus(TilePair.INCORRECT);
-            WIN = false;
+        for (int jx = offset; jx < offset + GameFragment.WORD_LENGTH; jx++) { // the rest are incorrect
+            if (getTileStatus(jx) == TilePair.UNCHECKED) {
+                setTileStatus(jx, TilePair.INCORRECT);
+                WIN = false;
+            }
         }
-    }
+        gameboard.setValue(gameboard.getValue());
         return WIN;
-}
+    }
 
-    public int getPosition() {
-        return getValue().size();
+    public TilePair get(int ix) {
+        return getPairList().get(ix);
+    }
+
+    int getPosition() {
+        return getPairList().size();
+    }
+    public int getCurrentRow() {
+        int quotient = getPosition() / GameFragment.WORD_LENGTH;
+        int remainder = getPosition() - quotient * GameFragment.WORD_LENGTH;
+        if (quotient == 0 || remainder != 0) {
+            return quotient;
+        } else {
+            return quotient - 1;
+        }
     }
 
     public void addChar(char k) {
-        if (getValue().size() < GameFragment.WORD_LENGTH * GameFragment.ROW_COUNT) {
-            getValue().add(new TilePair(k, TilePair.UNCHECKED));
+        if (getPairList().size() < GameFragment.WORD_LENGTH * GameFragment.ROW_COUNT) {
+            getPairList().add(new TilePair(k, TilePair.UNCHECKED));
+            gameboard.setValue(gameboard.getValue());
         }
     }
 }

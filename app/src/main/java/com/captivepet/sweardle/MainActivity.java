@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.Button;
 
 import com.captivepet.sweardle.ui.main.GameFragment;
 import com.captivepet.sweardle.ui.main.KeyboardFragment;
@@ -50,11 +51,18 @@ public class MainActivity extends AppCompatActivity {
                 game.setSize(getDisplayContentHeight());
                 int gameSize = keyboard.computeSizes(getDisplayContentHeight());
                 keyboard.init();
-//                game.init(gameSize);
-//                game.resetTiles();
+                game.init(gameSize);
             }
         });
         super.onResume();
+    }
+
+    public void onCharKey(View view) {
+        game.processChar(((Button) view).getText().toString().charAt(0));
+    }
+
+    public void onSpecialKey(View view) {
+        game.processChar(view.getTag().toString().charAt(0));
     }
 
     // https://gist.github.com/dominicthomas/8257203
