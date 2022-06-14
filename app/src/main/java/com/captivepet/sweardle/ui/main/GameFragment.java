@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
@@ -41,7 +42,7 @@ public class GameFragment extends Fragment implements LifecycleOwner {
     private ConstraintLayout mLayout;
     private MainViewModel mViewModel;
     private Toolbar mainToolbar;
-    private final Button[] tile = new Button[ROW_COUNT * WORD_LENGTH];
+    private final TextView[] tile = new Button[ROW_COUNT * WORD_LENGTH];
     private final int TILE_MARGIN = 1;
     private final int TILE_WIDTH_ADJUST = 2;
     public final static int ROW_COUNT = 6;
@@ -129,6 +130,11 @@ public class GameFragment extends Fragment implements LifecycleOwner {
      */
     public void onChanged(List<TilePair> pairList) {
         int position = pairList.size();
+        if (position == 0) {
+            for (TextView tv : tile) {
+                setDefault(tv);
+            }
+        }
         int start = (position / WORD_LENGTH) * WORD_LENGTH;
         if (start > 0 && position % WORD_LENGTH == 0) {
             start -= WORD_LENGTH;
@@ -183,7 +189,7 @@ public class GameFragment extends Fragment implements LifecycleOwner {
         }
     }
 
-    private void setDefault(Button t) {
+    private void setDefault(TextView t) {
         if (t != null) {
             t.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
             t.setText(String.valueOf(KeyboardFragment.BLANK));
@@ -204,7 +210,7 @@ public class GameFragment extends Fragment implements LifecycleOwner {
         ConstraintSet set = new ConstraintSet();
         set.clone(mLayout);
         for (int ix = 0; ix < tile.length; ix++) {
-            Button k = tile[ix];
+            TextView k = tile[ix];
             k.setEnabled(false);
 
             int id = k.getId();

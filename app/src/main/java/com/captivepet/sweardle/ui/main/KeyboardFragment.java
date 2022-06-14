@@ -3,6 +3,12 @@ package com.captivepet.sweardle.ui.main;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -10,23 +16,13 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
-
-import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageButton;
-
+import java.util.List;
+import java.util.Locale;
 import com.captivepet.sweardle.MainActivity;
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
 
-import java.util.List;
-import java.util.Locale;
 
 /**
  * Builds the keyboard which never changes
@@ -55,13 +51,9 @@ public class KeyboardFragment extends Fragment {
     public static final char BLANK = ' ';
     public static final char ENTER = '⏎';
     public static final char DEL = '⌫';
-    private static final Button[] key = new Button[KEY_LABEL.length];
+    private static final AppCompatButton[] key = new AppCompatButton[KEY_LABEL.length];
     private ImageButton enterButton;
     private ImageButton delButton;
-
-    // LiveData signals
-    public static final String UPDATE_FROM_LAST_ROW = "Update";
-    public static final String UPDATE_ALL = "Reset";
 
     public KeyboardFragment() {} // Required empty public constructor ??
     public static KeyboardFragment newInstance() { return new KeyboardFragment(); }
@@ -102,168 +94,163 @@ public class KeyboardFragment extends Fragment {
         return gameboardSize;
     }
 
-    public float getNewTotalWeight() {
-        return newTotalWeight;
-    }
-    public float getNewKeyboardWeight() {
-        return newKeyboardWeight;
-    }
     public void init() {
-        // make the keys
-        enterButton = new ImageButton(getContext());
-        enterButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
-        enterButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_keyboard_return_24));
-        enterButton.setTag(KeyboardFragment.ENTER);
-        enterButton.setId(View.generateViewId());
-        enterButton.setOnClickListener(new View.OnClickListener() {
-                                           @Override
-                                           public void onClick(View view) {
-                                               ((MainActivity) getActivity()).onSpecialKey(enterButton);
-                                           }
-                                       });
-        mLayout.addView(enterButton);
+         // make the keys, label & set constraints
+         if (enterButton == null) { //
+             enterButton = new ImageButton(getContext());
+             enterButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
+             enterButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_keyboard_return_24));
+             enterButton.setTag(KeyboardFragment.ENTER);
+             enterButton.setId(View.generateViewId());
+             enterButton.setOnClickListener(new View.OnClickListener() {
+                 @Override
+                 public void onClick(View view) {
+                     MainActivity myActivity = (MainActivity) getActivity();
+                     if (myActivity != null) {
+                         myActivity.onSpecialKey(enterButton);
+                     }
+                 }
+             });
+             mLayout.addView(enterButton);
 
-        delButton = new ImageButton(getContext());
-        delButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
-        delButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_undo_24));
-        delButton.setTag(KeyboardFragment.DEL);
-        delButton.setId(View.generateViewId());
-        delButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ((MainActivity) getActivity()).onSpecialKey(delButton);
-            }
-        });
-        mLayout.addView(delButton);
+             delButton = new ImageButton(getContext());
+             delButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
+             delButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_undo_24));
+             delButton.setTag(KeyboardFragment.DEL);
+             delButton.setId(View.generateViewId());
+             delButton.setOnClickListener(new View.OnClickListener() {
+                 @Override
+                 public void onClick(View view) {
+                     MainActivity myActivity = (MainActivity) getActivity();
+                     if (myActivity != null) {
+                         myActivity.onSpecialKey(enterButton);
+                     }
+                 }
+             });
+             mLayout.addView(delButton);
 
-        for (int ix = 0; ix < key.length; ix++) {
-            Button k;
-            k = new Button(mLayout.getContext());
-            k.setId(View.generateViewId());
-            k.setText(String.format(Locale.US, "%c", KEY_LABEL[ix]));
-            final String letter = String.valueOf(KEY_LABEL[ix]);
-            k.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ((MainActivity) getActivity()).onCharKey(k);
-                }
-            });
-            mLayout.addView(k);
-            k.setMaxLines(1);
-            k.setGravity(Gravity.CENTER);
+             for (int ix = 0; ix < key.length; ix++) {
+                 AppCompatButton k;
+                 k = new AppCompatButton(mLayout.getContext());
+                 k.setId(View.generateViewId());
+                 k.setText(String.format(Locale.US, "%c", KEY_LABEL[ix]));
+                 k.setOnClickListener(new View.OnClickListener() {
+                     @Override
+                     public void onClick(View view) {
+                        MainActivity myActivity = (MainActivity) getActivity();
+                         if (myActivity != null) {
+                             myActivity.onCharKey(k);
+                         }
+                     }
+                 });
+                 mLayout.addView(k);
+                 k.setMaxLines(1);
+                 k.setGravity(Gravity.CENTER);
 
-            k.setTag(TilePair.UNCHECKED);
-            k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
-            key[ix] = k;
-        }
+                 k.setTag(TilePair.UNCHECKED);
+                 k.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
+                 key[ix] = k;
+             }
 
-        // label & position the keys
-        ConstraintSet set = new ConstraintSet();
-        set.clone(mLayout);
-        for (int ix = 0; ix < key.length; ix++) {
-            View k = key[ix];
-            int id = k.getId();
-            // set key widths & text
-            set.constrainWidth(id, keyWidth);
-            set.constrainHeight(id, keyHeight);
-            int top, left, right, bottom, topS, leftS, rightS, bottomS, topM, leftM, rightM, bottomM;
+             // size & constraints
+             ConstraintSet set = new ConstraintSet();
+             set.clone(mLayout);
+             for (int ix = 0; ix < key.length; ix++) {
+                 View k = key[ix];
+                 int id = k.getId();
+                 set.constrainWidth(id, keyWidth);
+                 set.constrainHeight(id, keyHeight);
+                 int top, left, right, bottom, topS, leftS, rightS, bottomS, topM, leftM, rightM, bottomM;
 
-            // top & bottom constraints
-            if (ix == 0) {
-                set.setVerticalChainStyle(id, ConstraintSet.CHAIN_PACKED);
-                top = ConstraintSet.PARENT_ID;
-                topS = ConstraintSet.TOP;
-                topM = keyHeight / 2;
-                bottom = key[10].getId();
-                bottomS = ConstraintSet.TOP;
-                bottomM = keyMargin;
-            } else if (ix == 10) {
-                top = key[0].getId();
-                topS = ConstraintSet.BOTTOM;
-                topM = keyMargin;
-                bottom = key[19].getId();
-                bottomS = ConstraintSet.TOP;
-                bottomM = keyMargin;
-            } else if (ix == 19) {
-                top = key[10].getId();
-                topS = ConstraintSet.BOTTOM;
-                topM = keyMargin;
-                bottom = ConstraintSet.PARENT_ID;
-                bottomS = ConstraintSet.BOTTOM;
-                bottomM = keyHeight / 2;
-            } else {
-                top = key[ix - 1].getId();
-                topS = ConstraintSet.TOP;
-                topM = 0;
-                bottom = key[ix - 1].getId();
-                bottomS = ConstraintSet.BOTTOM;
-                bottomM = 0;
-            }
-            // left & right constraints
-            if (ix == 0 || ix == 10 || ix == 19){
+                 // top & bottom constraints
+                 if (ix == 0) {
+                     set.setVerticalChainStyle(id, ConstraintSet.CHAIN_PACKED);
+                     top = ConstraintSet.PARENT_ID;
+                     topS = ConstraintSet.TOP;
+                     topM = keyHeight / 2;
+                     bottom = key[10].getId();
+                     bottomS = ConstraintSet.TOP;
+                     bottomM = keyMargin;
+                 } else if (ix == 10) {
+                     top = key[0].getId();
+                     topS = ConstraintSet.BOTTOM;
+                     topM = keyMargin;
+                     bottom = key[19].getId();
+                     bottomS = ConstraintSet.TOP;
+                     bottomM = keyMargin;
+                 } else if (ix == 19) {
+                     top = key[10].getId();
+                     topS = ConstraintSet.BOTTOM;
+                     topM = keyMargin;
+                     bottom = ConstraintSet.PARENT_ID;
+                     bottomS = ConstraintSet.BOTTOM;
+                     bottomM = keyHeight / 2;
+                 } else {
+                     top = key[ix - 1].getId();
+                     topS = ConstraintSet.TOP;
+                     topM = 0;
+                     bottom = key[ix - 1].getId();
+                     bottomS = ConstraintSet.BOTTOM;
+                     bottomM = 0;
+                 }
+                 // left & right constraints
+                 if (ix == 0 || ix == 10 || ix == 19) {
 
-                if (ix == 19) {
-                    left = enterButton.getId();
-                    leftS = ConstraintSet.RIGHT;
-                    leftM = keyMargin;
-                } else {
-                    set.setHorizontalChainStyle(id, ConstraintSet.CHAIN_PACKED);
-                    left = ConstraintSet.PARENT_ID;
-                    leftS = ConstraintSet.LEFT;
-                    leftM = keyMargin;
-                }
-                right = key[ix + 1].getId();
-                rightS = ConstraintSet.LEFT;
-                rightM = keyMargin;
-            } else if (ix == 9 || ix == 18 || ix == 25) {
-                left = key[ix - 1].getId();
-                leftS = ConstraintSet.RIGHT;
-                leftM = keyMargin;
-                if (ix == 25) {
-                    right = delButton.getId();
-                    rightS = ConstraintSet.LEFT;
-                    rightM = keyMargin;
-                } else {
-                    right = ConstraintSet.PARENT_ID;
-                    rightS = ConstraintSet.RIGHT;
-                    rightM = keyMargin;
-                }
-            } else {
-                left = key[ix - 1].getId();
-                leftS = ConstraintSet.RIGHT;
-                leftM = keyMargin;
-                right = key[ix + 1].getId();
-                rightS = ConstraintSet.LEFT;
-                rightM = keyMargin;
-            }
-            set.connect(id, ConstraintSet.TOP, top, topS, topM);
-            set.connect(id, ConstraintSet.BOTTOM, bottom, bottomS, bottomM);
-            set.connect(id, ConstraintSet.LEFT, left, leftS, leftM);
-            set.connect(id, ConstraintSet.RIGHT, right, rightS, rightM);
-        }
-        set.connect(enterButton.getId(), ConstraintSet.TOP, key[19].getId(), ConstraintSet.TOP, 0);
-        set.connect(enterButton.getId(), ConstraintSet.BOTTOM, key[19].getId(), ConstraintSet.BOTTOM, 0);
-        set.connect(enterButton.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT, keyMargin);
-        set.connect(enterButton.getId(), ConstraintSet.RIGHT, key[19].getId(), ConstraintSet.LEFT, keyMargin);
-        set.setHorizontalChainStyle(enterButton.getId(), ConstraintSet.CHAIN_PACKED);
-        set.connect(delButton.getId(), ConstraintSet.TOP, key[25].getId(), ConstraintSet.TOP, 0);
-        set.connect(delButton.getId(), ConstraintSet.BOTTOM, key[25].getId(), ConstraintSet.BOTTOM, 0);
-        set.connect(delButton.getId(), ConstraintSet.LEFT, key[25].getId(), ConstraintSet.RIGHT, keyMargin);
-        set.connect(delButton.getId(), ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT, keyMargin);
-        set.constrainHeight(enterButton.getId(), keyHeight);
-        set.constrainHeight(delButton.getId(), keyHeight);
-        set.constrainWidth(enterButton.getId(), (int) (1.5f * keyWidth));
-        set.constrainWidth(delButton.getId(), (int) (1.5f * keyWidth));
-        set.applyTo(mLayout);
-
-        // special delButton setup for testing
-        delButton.setOnLongClickListener(view -> {
-            toggleKeyBoardWidth(view);
-            return false;
-        });
-        set.applyTo(mLayout);
+                     if (ix == 19) {
+                         left = enterButton.getId();
+                         leftS = ConstraintSet.RIGHT;
+                     } else {
+                         set.setHorizontalChainStyle(id, ConstraintSet.CHAIN_PACKED);
+                         left = ConstraintSet.PARENT_ID;
+                         leftS = ConstraintSet.LEFT;
+                     }
+                     leftM = keyMargin;
+                     right = key[ix + 1].getId();
+                     rightS = ConstraintSet.LEFT;
+                     rightM = keyMargin;
+                 } else if (ix == 9 || ix == 18 || ix == 25) {
+                     left = key[ix - 1].getId();
+                     leftS = ConstraintSet.RIGHT;
+                     leftM = keyMargin;
+                     if (ix == 25) {
+                         right = delButton.getId();
+                         rightS = ConstraintSet.LEFT;
+                     } else {
+                         right = ConstraintSet.PARENT_ID;
+                         rightS = ConstraintSet.RIGHT;
+                     }
+                     rightM = keyMargin;
+                 } else {
+                     left = key[ix - 1].getId();
+                     leftS = ConstraintSet.RIGHT;
+                     leftM = keyMargin;
+                     right = key[ix + 1].getId();
+                     rightS = ConstraintSet.LEFT;
+                     rightM = keyMargin;
+                 }
+                 set.connect(id, ConstraintSet.TOP, top, topS, topM);
+                 set.connect(id, ConstraintSet.BOTTOM, bottom, bottomS, bottomM);
+                 set.connect(id, ConstraintSet.LEFT, left, leftS, leftM);
+                 set.connect(id, ConstraintSet.RIGHT, right, rightS, rightM);
+             }
+             set.connect(enterButton.getId(), ConstraintSet.TOP, key[19].getId(), ConstraintSet.TOP, 0);
+             set.connect(enterButton.getId(), ConstraintSet.BOTTOM, key[19].getId(), ConstraintSet.BOTTOM, 0);
+             set.connect(enterButton.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT, keyMargin);
+             set.connect(enterButton.getId(), ConstraintSet.RIGHT, key[19].getId(), ConstraintSet.LEFT, keyMargin);
+             set.setHorizontalChainStyle(enterButton.getId(), ConstraintSet.CHAIN_PACKED);
+             set.connect(delButton.getId(), ConstraintSet.TOP, key[25].getId(), ConstraintSet.TOP, 0);
+             set.connect(delButton.getId(), ConstraintSet.BOTTOM, key[25].getId(), ConstraintSet.BOTTOM, 0);
+             set.connect(delButton.getId(), ConstraintSet.LEFT, key[25].getId(), ConstraintSet.RIGHT, keyMargin);
+             set.connect(delButton.getId(), ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT, keyMargin);
+             set.constrainHeight(enterButton.getId(), keyHeight);
+             set.constrainHeight(delButton.getId(), keyHeight);
+             set.constrainWidth(enterButton.getId(), (int) (1.5f * keyWidth));
+             set.constrainWidth(delButton.getId(), (int) (1.5f * keyWidth));
+             set.applyTo(mLayout);
+         }
     }
 
+    // label &
     public static int keyLookup(char c) {
         for (int ix = 0; ix < KEY_LABEL.length; ix++) {
             if (KEY_LABEL[ix] == c) {
@@ -273,77 +260,31 @@ public class KeyboardFragment extends Fragment {
         return BLANK;
     }
 
-    private int toggleState = 0;
-    public void toggleKeyBoardWidth(View view) {
-        ConstraintSet set = new ConstraintSet();
-        set.clone(mLayout);
-        if (toggleState % 3 == 0) {
-            set.setHorizontalChainStyle(key[0].getId(), ConstraintSet.CHAIN_SPREAD);
-            set.setHorizontalChainStyle(key[10].getId(), ConstraintSet.CHAIN_SPREAD);
-            set.setHorizontalChainStyle(enterButton.getId(), ConstraintSet.CHAIN_SPREAD);
-            toggleState++;
-        } else if (toggleState % 3 == 1){
-            set.setHorizontalChainStyle(key[0].getId(), ConstraintSet.CHAIN_SPREAD_INSIDE);
-            set.setHorizontalChainStyle(key[10].getId(), ConstraintSet.CHAIN_SPREAD_INSIDE);
-            set.setHorizontalChainStyle(enterButton.getId(), ConstraintSet.CHAIN_SPREAD_INSIDE);
-            toggleState++;
-        } else if (toggleState % 3 == 2) {
-            set.setHorizontalChainStyle(key[0].getId(), ConstraintSet.CHAIN_PACKED);
-            set.setHorizontalChainStyle(key[10].getId(), ConstraintSet.CHAIN_PACKED);
-            set.setHorizontalChainStyle(enterButton.getId(), ConstraintSet.CHAIN_PACKED);
-            toggleState++;
-        } else if (toggleState % 4 == 0) {
-            set.setVerticalChainStyle(key[0].getId(), ConstraintSet.CHAIN_SPREAD);
-            toggleState++;
-        }else if (toggleState % 4 == 1) {
-            set.setVerticalChainStyle(key[0].getId(), ConstraintSet.CHAIN_SPREAD_INSIDE);
-            toggleState++;
-        } else if (toggleState % 4 == 2) {
-            set.setVerticalChainStyle(key[0].getId(), ConstraintSet.CHAIN_PACKED);
-        }
-        set.applyTo(mLayout);
-    }
-
     /**
      * Update the key highlights. Only need to check the last row as
      * completed rows are implicitly immutable.
-     * @param gameboard - the array of TilePairs
+     * @param pairList - the array of TilePairs
      */
-    private void onChanged(List<TilePair> gameboard) {
-        if (mViewModel.getPosition() % GameFragment.WORD_LENGTH == 0) { // only update on complete rows
-            for (TilePair tp : mViewModel.getLastRow()) {
-                Button k = key[keyLookup(tp.getChar())];
+    private void onChanged(List<TilePair> pairList) {
+        int end = mViewModel.getPosition();
+        if (end > 0 && end % GameFragment.WORD_LENGTH == 0) { // only update complete rows
+            for (TilePair tp : pairList.subList(end - GameFragment.WORD_LENGTH, end)) {
+                AppCompatButton k = key[keyLookup(tp.getChar())];
                 int kStatus = (int) k.getTag();
-                if (kStatus == TilePair.MISPLACED || kStatus == TilePair.UNCHECKED) {
+                if (kStatus == TilePair.MISPLACED && tp.getStatus() == TilePair.CORRECT) {
+                    setKeyStatus(k, tp.getStatus());
+                } else if (kStatus == TilePair.UNCHECKED) {
                     setKeyStatus(k, tp.getStatus());
                 }
             }
+        } else if (end == 0 && enterButton != null) {
+            for (AppCompatButton k : key) {
+                setKeyStatus(k, TilePair.UNCHECKED);
+            }
         }
     }
-//        int start = mViewModel.getRowsDone() * GameFragment.WORD_LENGTH;
-//        int end = mViewModel.getPosition();
-//        Log.d(TAG, "start, end = " + start + ", " + end);
-//        Log.d(TAG, "subList.size() = " + gameboard.subList(start, end).size());
-//        for (TilePair guessChar : gameboard.subList(start, end)) {
-//            Button mKey = key[keyLookup(guessChar.getChar())];
-//            int guessStatus = guessChar.getStatus();
-//            int keyStatus = (int) mKey.getTag();
-//
-//            if (keyStatus == TilePair.MISPLACED || keyStatus == TilePair.UNCHECKED) {
-//                if (guessStatus == TilePair.CORRECT) {
-//                    setKeyStatus(mKey, TilePair.CORRECT);
-//                    Log.d(TAG, TilePair.getStatusName(keyStatus) + " -> " + TilePair.getStatusName(TilePair.CORRECT));
-//                } else if (guessStatus == TilePair.MISPLACED && keyStatus != TilePair.MISPLACED) {
-//                    setKeyStatus(mKey, TilePair.MISPLACED);
-//                    Log.d(TAG, TilePair.getStatusName(keyStatus) + " -> " + TilePair.getStatusName(TilePair.MISPLACED));
-//                } else if (guessStatus == TilePair.INCORRECT) {
-//                    Log.d(TAG, TilePair.getStatusName(keyStatus) + " -> " + TilePair.getStatusName(TilePair.INCORRECT));
-//                    setKeyStatus(mKey, TilePair.INCORRECT);
-//                }
-//            }
-//        }
 
-    private void setKeyStatus(Button key, int status) {
+    private void setKeyStatus(AppCompatButton key, int status) {
         key.setBackground(AppCompatResources.getDrawable(requireContext(), status));
         key.setTag(status);
     }

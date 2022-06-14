@@ -1,16 +1,12 @@
 package com.captivepet.sweardle.ui.main;
 
 import android.app.Application;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-
-import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.captivepet.sweardle.TilePair;
 import com.captivepet.sweardle.R;
 
@@ -88,6 +84,7 @@ public class MainViewModel extends AndroidViewModel {
 
     public void newGame() {
         getPairList().clear();
+        gameboard.setValue(getPairList());
         solution = getNewGameWord();
     }
 
@@ -179,7 +176,7 @@ public class MainViewModel extends AndroidViewModel {
             if (solution[jx] == guess[ix]) {
                 setTileStatus(offset + ix, TilePair.MISPLACED);
                     guess[ix] = dummy1;
-                    solution[ix] = dummy2;
+                    solution[jx] = dummy2;
                 }
             }
         }
@@ -194,10 +191,6 @@ public class MainViewModel extends AndroidViewModel {
         }
         gameboard.setValue(gameboard.getValue());
         return RESULT;
-    }
-
-    public TilePair get(int ix) {
-        return getPairList().get(ix);
     }
 
     int getPosition() {
