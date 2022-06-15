@@ -123,7 +123,7 @@ public class KeyboardFragment extends Fragment {
                  public void onClick(View view) {
                      MainActivity myActivity = (MainActivity) getActivity();
                      if (myActivity != null) {
-                         myActivity.onSpecialKey(enterButton);
+                         myActivity.onSpecialKey(delButton);
                      }
                  }
              });
