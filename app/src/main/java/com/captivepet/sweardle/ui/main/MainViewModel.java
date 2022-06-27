@@ -146,8 +146,8 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public boolean testWord() {
-        char dummy1 = '+'; // prevent matching capital letters
-        char dummy2 = '*'; // or each other
+        boolean RESULT = true;
+        char skip = '+'; // prevent matching capital letters
         int row = getRowsDone();
         char[] guess = getGuess(row);
         if (guess == null) {
@@ -155,40 +155,32 @@ public class MainViewModel extends AndroidViewModel {
         }
         char[] solution = this.solution.toCharArray();
         int offset = getRowsDone() * GameFragment.WORD_LENGTH;
-        for (int r = 0; r < row; r++) { // retain previous test results
-            for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) {
-                if (getTileChar(r * GameFragment.WORD_LENGTH + ix) == guess[ix]) {
-                    setTileStatus(offset + ix, getTileStatus(r * GameFragment.WORD_LENGTH + ix));
-                    guess[ix] = dummy1;
-                    solution[ix] = dummy2;
-                }
-            }
-        }
-        for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) { // check for new correct letters
-            if (solution[ix] == guess[ix]) {
+
+        // check for correct letters
+        for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) {
+            if (solution[ix] != skip && solution[ix] == guess[ix]) {
                 setTileStatus(offset + ix, TilePair.CORRECT);
-                guess[ix] = dummy1;
-                solution[ix] = dummy2;
+                solution[ix] = skip;
             }
         }
+        // check for misplaced letters
         for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) { // check for misplaced letters
             for (int jx = 0; jx < GameFragment.WORD_LENGTH; jx++) {
-            if (solution[jx] == guess[ix]) {
-                setTileStatus(offset + ix, TilePair.MISPLACED);
-                    guess[ix] = dummy1;
-                    solution[jx] = dummy2;
+                if (solution[ix] != skip && solution[ix] == guess[jx] && getTileStatus(jx) == TilePair.UNCHECKED) {
+                    RESULT = false;
+                    setTileStatus(offset + jx, TilePair.MISPLACED);
+                    solution[ix] = skip;
                 }
             }
         }
-        boolean RESULT = true;
+        // remainder are incorrect
         for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) { // the rest are incorrect
-            if (getTileStatus(offset + ix) != TilePair.CORRECT) {
+            if (getTileStatus(offset + ix) == TilePair.UNCHECKED) {
                 RESULT = false;
-                if (getTileStatus(offset + ix) == TilePair.UNCHECKED) {
-                    setTileStatus(offset + ix, TilePair.INCORRECT);
-                }
+                setTileStatus(offset + ix, TilePair.INCORRECT);
             }
         }
+        // notify listeners
         gameboard.setValue(gameboard.getValue());
         return RESULT;
     }
