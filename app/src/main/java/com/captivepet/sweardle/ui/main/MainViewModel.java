@@ -5,6 +5,8 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.SavedStateHandle;
+
 import java.util.ArrayList;
 import java.util.List;
 import com.captivepet.sweardle.TilePair;
@@ -17,18 +19,24 @@ import com.captivepet.sweardle.R;
 public class MainViewModel extends AndroidViewModel {
     private final String TAG = getClass().getSimpleName();
 
+    // https://developer.android.com/topic/libraries/architecture/viewmodel-savedstate
+
+
     // new
     private final MutableLiveData<List<TilePair>> gameboard = new MutableLiveData<>();
 
     private final String[] dict;
     private final String[] words;
     private String solution;
+    private SavedStateHandle modelState;
 
-    public MainViewModel(@NonNull Application application) {
+    public MainViewModel(@NonNull Application application, SavedStateHandle savedStateHandle) {
         super(application);
         this.dict = application.getResources().getStringArray(R.array.dict);
         this.words = application.getResources().getStringArray(R.array.words);
     }
+
+
 
     public String getSolution() {
         return solution;
@@ -48,6 +56,7 @@ public class MainViewModel extends AndroidViewModel {
     public LiveData<List<TilePair>> getGameboard() {
         if (gameboard.getValue() == null) {
             gameboard.setValue(new ArrayList<>(GameFragment.WORD_LENGTH * GameFragment.ROW_COUNT));
+            modelState.set("gameboard", gameboard);
         }
         return gameboard;
     }

@@ -4,6 +4,8 @@ import static android.content.ContentValues.TAG;
 import static com.captivepet.sweardle.R.id.fragment_game;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -26,8 +28,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
@@ -42,7 +42,7 @@ public class GameFragment extends Fragment implements LifecycleOwner {
     private ConstraintLayout mLayout;
     private MainViewModel mViewModel;
     private Toolbar mainToolbar;
-    private final TextView[] tile = new Button[ROW_COUNT * WORD_LENGTH];
+    private final AppCompatTextView[] tile = new AppCompatTextView[ROW_COUNT * WORD_LENGTH];
     private final int TILE_MARGIN = 1;
     private final int TILE_WIDTH_ADJUST = 2;
     public final static int ROW_COUNT = 6;
@@ -84,18 +84,18 @@ public class GameFragment extends Fragment implements LifecycleOwner {
 
     @Override
     public void onResume() {
-        View parent = (View) mLayout.getParent();
-        parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                if (mViewModel.getPosition() == 0) {
-                    mViewModel.newGame();
-
-                }
-                init(Math.min(size.x, size.y));
-            }
-        });
+//        View parent = (View) mLayout.getParent();
+//        parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//            @Override
+//            public void onGlobalLayout() {
+//                parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+//                if (mViewModel.getPosition() == 0) {
+//                    mViewModel.newGame();
+//
+//                }
+//                init(Math.min(size.x, size.y));
+//            }
+//        });
         super.onResume();
     }
 
@@ -131,8 +131,8 @@ public class GameFragment extends Fragment implements LifecycleOwner {
     public void onChanged(List<TilePair> pairList) {
         int position = pairList.size();
         if (position == 0) {
-            for (TextView tv : tile) {
-                setDefault(tv);
+            for (int ix = 0; ix < tile.length; ix++) {
+                tile[ix] = getDefaultTile(tile[ix]);
             }
         }
         int start = (position / WORD_LENGTH) * WORD_LENGTH;
@@ -140,11 +140,14 @@ public class GameFragment extends Fragment implements LifecycleOwner {
             start -= WORD_LENGTH;
         }
         for (int ix = start; ix < position; ix++) {
+            if (tile[ix] == null) { // e.g., after rotation
+                return;
+            }
             tile[ix].setText(String.format("%c", mViewModel.getTileChar(ix)));
             tile[ix].setBackground(AppCompatResources.getDrawable(requireContext(), mViewModel.getTileStatus(ix)));
         }
         if (position < WORD_LENGTH * ROW_COUNT) {
-            setDefault(tile[position]);
+            tile[position] = getDefaultTile(tile[position]);
         }
     }
 
@@ -188,29 +191,32 @@ public class GameFragment extends Fragment implements LifecycleOwner {
             }
         }
     }
-
-    private void setDefault(TextView t) {
-        if (t != null) {
-            t.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
-            t.setText(String.valueOf(KeyboardFragment.BLANK));
+    int counter = 0;
+    private AppCompatTextView getDefaultTile(AppCompatTextView tv) {
+        Log.d(TAG, "getDefaultTile");
+        if (tv == null) {
+            Log.d(TAG, "creating tv " + counter++);
+            tv = new AppCompatTextView(mLayout.getContext());
+            mLayout.addView(tv);
+            tv.setId(View.generateViewId());
+            tv.setTextColor(AppCompatResources.getColorStateList(requireContext(), R.color.black));
         }
+        tv.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
+        tv.setText(String.valueOf(KeyboardFragment.BLANK));
+        return tv;
     }
 
     public void init(int height) {
+        Log.d(TAG, "init");
         int tileSize = height / (WORD_LENGTH + TILE_WIDTH_ADJUST);
         // make all the tiles;
         for (int ix = 0; ix < ROW_COUNT * WORD_LENGTH; ix++) {
-            Button k = new Button(mLayout.getContext());
-            mLayout.addView(k);
-            k.setId(View.generateViewId());
-            k.setTextColor(AppCompatResources.getColorStateList(requireContext(), R.color.black));
-            setDefault(k);
-            tile[ix] = k;
+            tile[ix] = getDefaultTile(tile[ix]);
         }
         ConstraintSet set = new ConstraintSet();
         set.clone(mLayout);
         for (int ix = 0; ix < tile.length; ix++) {
-            TextView k = tile[ix];
+            AppCompatTextView k = tile[ix];
             k.setEnabled(false);
 
             int id = k.getId();

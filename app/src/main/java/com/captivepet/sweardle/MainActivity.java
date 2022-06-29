@@ -1,9 +1,7 @@
 package com.captivepet.sweardle;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-
+import androidx.appcompat.widget.AppCompatButton;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Size;
@@ -11,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.widget.Button;
-
 import com.captivepet.sweardle.ui.main.GameFragment;
 import com.captivepet.sweardle.ui.main.KeyboardFragment;
 
@@ -39,8 +35,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        GameFragment game = (GameFragment) getSupportFragmentManager().findFragmentById(R.id.game_fragment);
-        KeyboardFragment keyboard = (KeyboardFragment) getSupportFragmentManager().findFragmentById(R.id.keyboard_fragment);
+        if (game == null) {
+            game = (GameFragment) getSupportFragmentManager().findFragmentById(R.id.game_fragment);
+        }
+        if (keyboard == null) {
+            keyboard = (KeyboardFragment) getSupportFragmentManager().findFragmentById(R.id.keyboard_fragment);
+        }
         container = findViewById(R.id.container);
 
         View parent = (View) container.getParent();
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onCharKey(View view) {
-        game.processChar(((Button) view).getText().toString().charAt(0));
+        game.processChar(((AppCompatButton) view).getText().charAt(0));
     }
 
     public void onSpecialKey(View view) {
