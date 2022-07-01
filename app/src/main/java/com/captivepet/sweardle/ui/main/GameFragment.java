@@ -1,10 +1,8 @@
 package com.captivepet.sweardle.ui.main;
 
-import static android.content.ContentValues.TAG;
 import static com.captivepet.sweardle.R.id.fragment_game;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -13,7 +11,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.appcompat.app.AlertDialog;
 
-import android.graphics.Point;
+import android.content.ContentValues;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,7 +25,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.Toast;
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
@@ -35,10 +32,9 @@ import com.captivepet.sweardle.TilePair;
 import java.util.List;
 
 
-public class GameFragment extends Fragment implements LifecycleOwner {
-    private final String tag = this.getClass().getSimpleName();
+public class GameFragment extends Fragment {
+    private final String TAG = this.getClass().getSimpleName();
 
-    private Point size;
     private ConstraintLayout mLayout;
     private MainViewModel mViewModel;
     private Toolbar mainToolbar;
@@ -50,16 +46,6 @@ public class GameFragment extends Fragment implements LifecycleOwner {
     public final static char EMPTY = ' ';
     public static final String BAD_WORD = "Guess not in dict";
 
-    private boolean GUESS_TESTED;
-
-    // LiveData signals
-    public static final String ADD_CHAR = "Add one char";
-    public static final String WINNER = "Winner";
-    public static final String LOSER = "Loser";
-    public static final String ROW_UPDATED = "Re-highlight row";
-    public static final String RESET = "Clear all";
-    public static final String DEL = "" + KeyboardFragment.DEL;
-
     public static GameFragment newInstance() {
         return new GameFragment();
     }
@@ -68,8 +54,8 @@ public class GameFragment extends Fragment implements LifecycleOwner {
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        setHasOptionsMenu(true);
-        return inflater.inflate(R.layout.fragment_game, container, false);
+                setHasOptionsMenu(true);
+                return inflater.inflate(R.layout.fragment_game, container, false);
     }
 
     @Override
@@ -80,23 +66,6 @@ public class GameFragment extends Fragment implements LifecycleOwner {
         mViewModel.getGameboard().observe(getViewLifecycleOwner(), this::onChanged);
         mainToolbar = requireActivity().findViewById(R.id.main_toolbar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(mainToolbar);
-    }
-
-    @Override
-    public void onResume() {
-//        View parent = (View) mLayout.getParent();
-//        parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-//            @Override
-//            public void onGlobalLayout() {
-//                parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-//                if (mViewModel.getPosition() == 0) {
-//                    mViewModel.newGame();
-//
-//                }
-//                init(Math.min(size.x, size.y));
-//            }
-//        });
-        super.onResume();
     }
 
     @Override
@@ -120,38 +89,29 @@ public class GameFragment extends Fragment implements LifecycleOwner {
         }
     }
 
-    public void setSize(Point s) {
-        this.size = s;
-    }
-
     /**
-     * Redraw the last row of the gameboard
+     * Redraw the gameboard
      * @param pairList - LiveData object that triggers this method
      */
     public void onChanged(List<TilePair> pairList) {
-        int position = pairList.size();
-        if (position == 0) {
-            for (int ix = 0; ix < tile.length; ix++) {
-                tile[ix] = getDefaultTile(tile[ix]);
-            }
+        if (tile[0] == null) {
+            return;
         }
-        int start = (position / WORD_LENGTH) * WORD_LENGTH;
-        if (start > 0 && position % WORD_LENGTH == 0) {
-            start -= WORD_LENGTH;
-        }
-        for (int ix = start; ix < position; ix++) {
-            if (tile[ix] == null) { // e.g., after rotation
-                return;
-            }
+        for (AppCompatTextView tv : tile) {
+            int ix = Integer.parseInt(tv.getTag().toString());
             tile[ix].setText(String.format("%c", mViewModel.getTileChar(ix)));
             tile[ix].setBackground(AppCompatResources.getDrawable(requireContext(), mViewModel.getTileStatus(ix)));
-        }
-        if (position < WORD_LENGTH * ROW_COUNT) {
-            tile[position] = getDefaultTile(tile[position]);
         }
     }
 
     public void processChar(char keyChar) {
+        boolean GUESS_TESTED = false;
+        int postion = mViewModel.getPosition();
+        if (postion > 0
+            && postion % GameFragment.WORD_LENGTH == 0
+            && mViewModel.getTileStatus(postion - 1) != TilePair.UNCHECKED) {
+            GUESS_TESTED = true;
+        }
         switch(keyChar) {
         case KeyboardFragment.ENTER:
             List<TilePair> guess = mViewModel.getLastRow(); // valid word or null
@@ -159,13 +119,12 @@ public class GameFragment extends Fragment implements LifecycleOwner {
                 return;
             }
             if (!GUESS_TESTED) {
-                if (mViewModel.validateGuess()) { // word must be in dict
+                if (mViewModel.validateGuess()) { // word m`ust be in dict
                     boolean WINNER = mViewModel.testWord();
-                    GUESS_TESTED = true;
                     if (WINNER) {
                         newGameQuery(getString(R.string.congratulations));
                     } else if (mViewModel.getRowsDone() == ROW_COUNT) {
-                        newGameQuery(String.format(getString(R.string.taunt), mViewModel.getSolution()));
+                        newGameQuery(String.format(getString(R.string.taunt), mViewModel.getSolution(false)));
                     }
                 } else {
                     badWordAlert();
@@ -175,49 +134,46 @@ public class GameFragment extends Fragment implements LifecycleOwner {
         case KeyboardFragment.DEL:
             TilePair tp = mViewModel.getLastChar();
             if (tp != null && tp.getStatus() == TilePair.UNCHECKED) {
-                Log.d(TAG, String.format("tp = %c, %s", tp.getChar(), TilePair.getStatusName(tp.getStatus())));
+                Log.d(ContentValues.TAG, String.format("tp = %c, %s", tp.getChar(), TilePair.getStatusName(tp.getStatus())));
                 mViewModel.deleteLastChar();
-                if (mViewModel.getPosition() % WORD_LENGTH == 0) {
-                    GUESS_TESTED = true;
-                }
             }
             break;
         default:
             if (KeyboardFragment.firstLetter <= keyChar && keyChar<= KeyboardFragment.lastLetter) {
                 if (GUESS_TESTED || mViewModel.getPosition() == 0 || mViewModel.getPosition() % WORD_LENGTH != 0) {
                     mViewModel.addChar(keyChar);
-                    GUESS_TESTED = false;
                 }
             }
         }
     }
-    int counter = 0;
-    private AppCompatTextView getDefaultTile(AppCompatTextView tv) {
-        Log.d(TAG, "getDefaultTile");
-        if (tv == null) {
-            Log.d(TAG, "creating tv " + counter++);
+
+    private AppCompatTextView getTile(int ix) {
+        Log.d(ContentValues.TAG, "getDefaultTile");
+        AppCompatTextView tv;
+        if (tile[ix] != null) {
+            tv = tile[ix];
+        } else {
             tv = new AppCompatTextView(mLayout.getContext());
-            mLayout.addView(tv);
             tv.setId(View.generateViewId());
-            tv.setTextColor(AppCompatResources.getColorStateList(requireContext(), R.color.black));
+            tv.setTag(String.format("%02d", ix));
         }
-        tv.setBackground(AppCompatResources.getDrawable(requireContext(), TilePair.UNCHECKED));
-        tv.setText(String.valueOf(KeyboardFragment.BLANK));
-        return tv;
+            tv.setTextColor(AppCompatResources.getColorStateList(requireContext(), R.color.black));
+            return tv;
     }
 
     public void init(int height) {
-        Log.d(TAG, "init");
         int tileSize = height / (WORD_LENGTH + TILE_WIDTH_ADJUST);
         // make all the tiles;
         for (int ix = 0; ix < ROW_COUNT * WORD_LENGTH; ix++) {
-            tile[ix] = getDefaultTile(tile[ix]);
+            if (tile[ix] == null) {
+                tile[ix] = getTile(ix);
+                mLayout.addView(tile[ix]);
+            }
         }
         ConstraintSet set = new ConstraintSet();
         set.clone(mLayout);
         for (int ix = 0; ix < tile.length; ix++) {
             AppCompatTextView k = tile[ix];
-            k.setEnabled(false);
 
             int id = k.getId();
             k.setGravity(Gravity.CENTER);
@@ -287,6 +243,8 @@ public class GameFragment extends Fragment implements LifecycleOwner {
             set.connect(id, ConstraintSet.RIGHT, right, rightS, rightM);
         }
         set.applyTo(mLayout);
+        onChanged(mViewModel.getPairList());
+        Log.d(TAG, "init ends");
     }
 
     // https://www.javatpoint.com/android-alert-dialog-example

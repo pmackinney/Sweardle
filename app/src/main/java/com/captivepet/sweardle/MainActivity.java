@@ -13,10 +13,13 @@ import com.captivepet.sweardle.ui.main.GameFragment;
 import com.captivepet.sweardle.ui.main.KeyboardFragment;
 
 public class MainActivity extends AppCompatActivity {
-    public Size windowSize;
-    GameFragment game;
-    KeyboardFragment keyboard;
-    ViewGroup container;
+    private int keyboardWidth;
+    private int gameboardSize;
+    private GameFragment game;
+    private KeyboardFragment keyboard;
+    private ViewGroup container;
+    private final int GAME = 0;
+    private final int KEYBOARD = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,16 +45,15 @@ public class MainActivity extends AppCompatActivity {
             keyboard = (KeyboardFragment) getSupportFragmentManager().findFragmentById(R.id.keyboard_fragment);
         }
         container = findViewById(R.id.container);
-
         View parent = (View) container.getParent();
         parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 parent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                game.setSize(getDisplayContentHeight());
-                int gameSize = keyboard.computeSizes(getDisplayContentHeight());
-                keyboard.init();
-                game.init(gameSize);
+                computeFragmentSizes(getDisplayContentHeight());
+                assert (keyboardWidth > 0 && gameboardSize > 0);
+                game.init(gameboardSize);
+                keyboard.init(keyboardWidth);
             }
         });
         super.onResume();
@@ -69,13 +71,20 @@ public class MainActivity extends AppCompatActivity {
     public Point getDisplayContentHeight() {
         final WindowManager windowManager = getWindowManager();
         final Point size = new Point();
-        int screenHeight = 0, actionBarHeight = 0;
-        if (getActionBar() != null) {
-            actionBarHeight = getActionBar().getHeight();
-        }
+        int actionBarHeight = (getActionBar() != null) ? getActionBar().getHeight() : 0;
         int contentTop = findViewById(android.R.id.content).getTop();
-        windowManager.getDefaultDisplay().getSize(size);
+        windowManager.getDefaultDisplay().getSize(size); // x = width, y = height
         size.y -= (contentTop + actionBarHeight);
         return size;
+    }
+
+    public void computeFragmentSizes(Point windowSize) {
+        if (windowSize.y >= windowSize.x) { // portrait
+            keyboardWidth = windowSize.x;
+            gameboardSize = Math.min(windowSize.x, (int) (KeyboardFragment.KEYBOARD_WIDTH_TO_HEIGHT_RATIO * windowSize.y));
+        } else { // landscape
+            gameboardSize = (int) Math.min(windowSize.x - windowSize.y, windowSize.x / 2f);
+            keyboardWidth = windowSize.x - gameboardSize;
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.captivepet.sweardle.ui.main;
 import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
@@ -28,17 +29,21 @@ public class MainViewModel extends AndroidViewModel {
     private final String[] dict;
     private final String[] words;
     private String solution;
-    private SavedStateHandle modelState;
+    private SavedStateHandle state;
+    private final String GUESS_TESTED_KEY = "guess";
+    private final String SOLUTION_KEY = "solution";
 
     public MainViewModel(@NonNull Application application, SavedStateHandle savedStateHandle) {
         super(application);
         this.dict = application.getResources().getStringArray(R.array.dict);
         this.words = application.getResources().getStringArray(R.array.words);
+        this.state = savedStateHandle;
     }
 
-
-
-    public String getSolution() {
+    public String getSolution(boolean NEW) {
+        if (solution == null || NEW) {
+            this.solution = getNewGameWord();
+        }
         return solution;
     }
 
@@ -56,7 +61,6 @@ public class MainViewModel extends AndroidViewModel {
     public LiveData<List<TilePair>> getGameboard() {
         if (gameboard.getValue() == null) {
             gameboard.setValue(new ArrayList<>(GameFragment.WORD_LENGTH * GameFragment.ROW_COUNT));
-            modelState.set("gameboard", gameboard);
         }
         return gameboard;
     }
@@ -67,7 +71,12 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public char getTileChar(int ix) {
-        return getPairList().get(ix).getChar();
+        List<TilePair> pairList = getPairList();
+        if (ix < pairList.size()) {
+            return getPairList().get(ix).getChar();
+        } else {
+            return KeyboardFragment.BLANK;
+        }
     }
 
     private void setTileStatus(int ix, int status) {
@@ -75,7 +84,12 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public int getTileStatus(int ix) {
-        return getPairList().get(ix).getStatus();
+        List<TilePair> pairList = getPairList();
+        if (ix < pairList.size()) {
+            return getPairList().get(ix).getStatus();
+        } else {
+            return TilePair.UNCHECKED;
+        }
     }
 
     /**
@@ -94,7 +108,7 @@ public class MainViewModel extends AndroidViewModel {
     public void newGame() {
         getPairList().clear();
         gameboard.setValue(getPairList());
-        solution = getNewGameWord();
+        solution = getSolution(true);
     }
 
     private String getNewGameWord() {
@@ -162,7 +176,7 @@ public class MainViewModel extends AndroidViewModel {
         if (guess == null) {
             return false;
         }
-        char[] solution = this.solution.toCharArray();
+        char[] solution = getSolution(false).toCharArray();
         int offset = getRowsDone() * GameFragment.WORD_LENGTH;
 
         // check for correct letters
@@ -195,6 +209,8 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     int getPosition() {
+        List<TilePair> mList = getPairList();
+        int s = mList.size();
         return getPairList().size();
     }
 
