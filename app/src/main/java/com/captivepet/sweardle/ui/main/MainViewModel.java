@@ -189,7 +189,7 @@ public class MainViewModel extends AndroidViewModel {
         // check for misplaced letters
         for (int ix = 0; ix < GameFragment.WORD_LENGTH; ix++) { // check for misplaced letters
             for (int jx = 0; jx < GameFragment.WORD_LENGTH; jx++) {
-                if (solution[ix] != skip && solution[ix] == guess[jx] && getTileStatus(jx) == TilePair.UNCHECKED) {
+                if (solution[ix] != skip && solution[ix] == guess[jx] && getTileStatus(offset + jx) == TilePair.UNCHECKED) {
                     RESULT = false;
                     setTileStatus(offset + jx, TilePair.MISPLACED);
                     solution[ix] = skip;
