@@ -1,20 +1,22 @@
 package com.captivepet.sweardle.ui.main;
 
-import android.graphics.Point;
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
@@ -59,8 +61,9 @@ public class KeyboardFragment extends Fragment {
     public static final char ENTER = '⏎';
     public static final char DEL = '⌫';
     private static final AppCompatButton[] key = new AppCompatButton[KEY_LABEL.length];
-    private ImageButton enterButton;
-    private ImageButton delButton;
+    private AppCompatImageButton enterButton;
+    private AppCompatImageButton delButton;
+    Vibrator vibe;
 
     public KeyboardFragment() {
     } // Required empty public constructor ??
@@ -93,10 +96,12 @@ public class KeyboardFragment extends Fragment {
     }
 
     public void init(int keyboardWidth) {
+        this.vibe = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
         computeSizes(keyboardWidth);
         // make the keys, label & set constraints
         if (enterButton == null) { //
-            enterButton = new ImageButton(getContext());
+            enterButton = new AppCompatImageButton(getContext());
+            enterButton.setHapticFeedbackEnabled(true);
             enterButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
             enterButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_keyboard_return_24));
             enterButton.setTag(KeyboardFragment.ENTER);
@@ -105,14 +110,13 @@ public class KeyboardFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     MainActivity myActivity = (MainActivity) getActivity();
-                    if (myActivity != null) {
                         myActivity.onSpecialKey(enterButton);
                     }
-                }
-            });
+                });
             mLayout.addView(enterButton);
 
-            delButton = new ImageButton(getContext());
+            delButton = new AppCompatImageButton(getContext());
+            enterButton.setHapticFeedbackEnabled(true);
             delButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
             delButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_undo_24));
             delButton.setTag(KeyboardFragment.DEL);
@@ -123,6 +127,7 @@ public class KeyboardFragment extends Fragment {
                     MainActivity myActivity = (MainActivity) getActivity();
                     if (myActivity != null) {
                         myActivity.onSpecialKey(delButton);
+                        vibe.vibrate(VibrationEffect.EFFECT_CLICK);
                     }
                 }
             });
@@ -131,6 +136,7 @@ public class KeyboardFragment extends Fragment {
             for (int ix = 0; ix < key.length; ix++) {
                 AppCompatButton k;
                 k = new AppCompatButton(mLayout.getContext());
+                enterButton.setHapticFeedbackEnabled(true);
                 k.setId(View.generateViewId());
                 k.setText(String.format(Locale.US, "%c", KEY_LABEL[ix]));
                 k.setOnClickListener(new View.OnClickListener() {
@@ -284,7 +290,7 @@ public class KeyboardFragment extends Fragment {
             for (TilePair tp : pairList.subList(end - GameFragment.WORD_LENGTH, end)) {
                 AppCompatButton k = key[keyLookup(tp.getChar())];
                 int kStatus = (int) k.getTag();
-                if (kStatus == TilePair.MISPLACED && tp.getStatus() == TilePair.CORRECT) {
+                if (kStatus != TilePair.CORRECT && tp.getStatus() == TilePair.CORRECT) {
                     setKeyStatus(k, tp.getStatus());
                 } else if (kStatus == TilePair.UNCHECKED) {
                     setKeyStatus(k, tp.getStatus());
