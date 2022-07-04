@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             keyboardWidth = windowSize.x;
             gameboardSize = Math.min(windowSize.x, (int) (KeyboardFragment.KEYBOARD_WIDTH_TO_HEIGHT_RATIO * windowSize.y));
         } else { // landscape
-            gameboardSize = (int) Math.min(windowSize.x - windowSize.y, windowSize.x / 2f);
+            gameboardSize = (int) Math.min(windowSize.y, windowSize.x / 2f);
             keyboardWidth = windowSize.x - gameboardSize;
         }
     }
