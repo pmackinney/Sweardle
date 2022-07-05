@@ -1,22 +1,11 @@
 package com.captivepet.sweardle.ui.main;
 
-import static com.captivepet.sweardle.R.id.fragment_game;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.widget.AppCompatTextView;
-import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.appcompat.app.AlertDialog;
-
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
+import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -26,11 +15,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import com.captivepet.sweardle.R;
 import com.captivepet.sweardle.TilePair;
-
 import java.util.List;
-
+import static com.captivepet.sweardle.R.id.fragment_game;
 
 public class GameFragment extends Fragment {
     private final String TAG = this.getClass().getSimpleName();
@@ -45,6 +44,7 @@ public class GameFragment extends Fragment {
     public final static int WORD_LENGTH = 5;
     public final static char EMPTY = ' ';
     public static final String BAD_WORD = "Guess not in dict";
+    Vibrator vibe;
 
     public static GameFragment newInstance() {
         return new GameFragment();
@@ -67,6 +67,7 @@ public class GameFragment extends Fragment {
         mainToolbar = requireActivity().findViewById(R.id.main_toolbar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(mainToolbar);
     }
+
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, MenuInflater inflater) {
@@ -103,7 +104,9 @@ public class GameFragment extends Fragment {
             tile[ix].setBackground(AppCompatResources.getDrawable(requireContext(), mViewModel.getTileStatus(ix)));
         }
     }
-
+    int effect = -1;
+    int[] effectList = new int[]{ VibrationEffect.EFFECT_TICK, VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_HEAVY_CLICK, VibrationEffect.EFFECT_DOUBLE_CLICK};
+    @SuppressLint("InlinedApi")
     public void processChar(char keyChar) {
         boolean GUESS_TESTED = false;
         int postion = mViewModel.getPosition();
@@ -112,8 +115,12 @@ public class GameFragment extends Fragment {
             && mViewModel.getTileStatus(postion - 1) != TilePair.UNCHECKED) {
             GUESS_TESTED = true;
         }
+        int vibration = VibrationEffect.EFFECT_CLICK;
         switch(keyChar) {
         case KeyboardFragment.ENTER:
+            effect += 1;
+            effect = effect % effectList.length;
+            vibe.vibrate(effect);
             List<TilePair> guess = mViewModel.getLastRow(); // valid word or null
             if (guess == null || guess.size() < WORD_LENGTH) {
                 return;
@@ -128,6 +135,7 @@ public class GameFragment extends Fragment {
                     }
                 } else {
                     badWordAlert();
+                    vibration = VibrationEffect.EFFECT_DOUBLE_CLICK;
                 }
             }
             break;
@@ -136,15 +144,20 @@ public class GameFragment extends Fragment {
             if (tp != null && tp.getStatus() == TilePair.UNCHECKED) {
                 Log.d(ContentValues.TAG, String.format("tp = %c, %s", tp.getChar(), TilePair.getStatusName(tp.getStatus())));
                 mViewModel.deleteLastChar();
+            } else {
+                vibration = VibrationEffect.EFFECT_DOUBLE_CLICK;
             }
             break;
         default:
             if (KeyboardFragment.firstLetter <= keyChar && keyChar<= KeyboardFragment.lastLetter) {
                 if (GUESS_TESTED || mViewModel.getPosition() == 0 || mViewModel.getPosition() % WORD_LENGTH != 0) {
                     mViewModel.addChar(keyChar);
+                } else {
+                    vibration = VibrationEffect.EFFECT_DOUBLE_CLICK;
                 }
             }
         }
+        vibe.vibrate(vibration);
     }
 
     private AppCompatTextView getTile(int ix) {
@@ -162,6 +175,7 @@ public class GameFragment extends Fragment {
     }
 
     public void init(int height) {
+        this.vibe = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
         int tileSize = height / (WORD_LENGTH + TILE_WIDTH_ADJUST);
         // make all the tiles;
         for (int ix = 0; ix < ROW_COUNT * WORD_LENGTH; ix++) {
