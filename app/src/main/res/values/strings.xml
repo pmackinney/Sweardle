@@ -10,5 +10,5 @@
     <string name="congratulations">You won!</string>
     <string name="taunt">You lost. The answer was %s</string>
     <string name="enter_symbol">&#8996;</string>
-    <string name="del_symbol">&#9003;</string>
+    <string name="del_symbol">&#2326;</string>
 </resources>

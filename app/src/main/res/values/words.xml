@@ -11,7 +11,6 @@
         <item type="string" name="ALBUM">ALBUM</item>
         <item type="string" name="OTHER">OTHER</item>
         <item type="string" name="NORTH">NORTH</item>
-        <item type="string" name="YEARS">YEARS</item>
         <item type="string" name="WHERE">WHERE</item>
         <item type="string" name="THREE">THREE</item>
         <item type="string" name="MUSIC">MUSIC</item>
@@ -29,7 +28,6 @@
         <item type="string" name="FOUND">FOUND</item>
         <item type="string" name="PARTY">PARTY</item>
         <item type="string" name="BEING">BEING</item>
-        <item type="string" name="GAMES">GAMES</item>
         <item type="string" name="WHILE">WHILE</item>
         <item type="string" name="EARLY">EARLY</item>
         <item type="string" name="PLACE">PLACE</item>
@@ -42,11 +40,8 @@
         <item type="string" name="LOCAL">LOCAL</item>
         <item type="string" name="TITLE">TITLE</item>
         <item type="string" name="THIRD">THIRD</item>
-        <item type="string" name="INDIA">INDIA</item>
         <item type="string" name="UNION">UNION</item>
         <item type="string" name="ALONG">ALONG</item>
-        <item type="string" name="GENUS">GENUS</item>
-        <item type="string" name="JAMES">JAMES</item>
         <item type="string" name="RADIO">RADIO</item>
         <item type="string" name="DEATH">DEATH</item>
         <item type="string" name="EVENT">EVENT</item>
@@ -55,16 +50,13 @@
         <item type="string" name="LARGE">LARGE</item>
         <item type="string" name="GREAT">GREAT</item>
         <item type="string" name="RURAL">RURAL</item>
-        <item type="string" name="TIMES">TIMES</item>
         <item type="string" name="FIELD">FIELD</item>
         <item type="string" name="COACH">COACH</item>
-        <item type="string" name="WORKS">WORKS</item>
         <item type="string" name="ORDER">ORDER</item>
         <item type="string" name="WATER">WATER</item>
         <item type="string" name="COURT">COURT</item>
         <item type="string" name="DEBUT">DEBUT</item>
         <item type="string" name="JAPAN">JAPAN</item>
-        <item type="string" name="MILES">MILES</item>
         <item type="string" name="WHITE">WHITE</item>
         <item type="string" name="BLACK">BLACK</item>
         <item type="string" name="CHINA">CHINA</item>
@@ -78,10 +70,8 @@
         <item type="string" name="MEDAL">MEDAL</item>
         <item type="string" name="VIDEO">VIDEO</item>
         <item type="string" name="NOVEL">NOVEL</item>
-        <item type="string" name="TEXAS">TEXAS</item>
         <item type="string" name="LEVEL">LEVEL</item>
         <item type="string" name="POINT">POINT</item>
-        <item type="string" name="CLASS">CLASS</item>
         <item type="string" name="GREEK">GREEK</item>
         <item type="string" name="THOSE">THOSE</item>
         <item type="string" name="STILL">STILL</item>
@@ -93,7 +83,6 @@
         <item type="string" name="COAST">COAST</item>
         <item type="string" name="MEDIA">MEDIA</item>
         <item type="string" name="RUGBY">RUGBY</item>
-        <item type="string" name="BOOKS">BOOKS</item>
         <item type="string" name="ROMAN">ROMAN</item>
         <item type="string" name="RANGE">RANGE</item>
         <item type="string" name="HENRY">HENRY</item>
@@ -101,7 +90,6 @@
         <item type="string" name="ROUND">ROUND</item>
         <item type="string" name="TRACK">TRACK</item>
         <item type="string" name="PLANT">PLANT</item>
-        <item type="string" name="WALES">WALES</item>
         <item type="string" name="WOMEN">WOMEN</item>
         <item type="string" name="STYLE">STYLE</item>
         <item type="string" name="IRISH">IRISH</item>
@@ -124,16 +112,12 @@
         <item type="string" name="LOWER">LOWER</item>
         <item type="string" name="BROWN">BROWN</item>
         <item type="string" name="EIGHT">EIGHT</item>
-        <item type="string" name="PARIS">PARIS</item>
         <item type="string" name="RIGHT">RIGHT</item>
         <item type="string" name="TODAY">TODAY</item>
         <item type="string" name="EVERY">EVERY</item>
         <item type="string" name="MATCH">MATCH</item>
-        <item type="string" name="STARS">STARS</item>
         <item type="string" name="WHOSE">WHOSE</item>
-        <item type="string" name="NAMES">NAMES</item>
         <item type="string" name="LABEL">LABEL</item>
-        <item type="string" name="PARTS">PARTS</item>
         <item type="string" name="TRADE">TRADE</item>
         <item type="string" name="STUDY">STUDY</item>
         <item type="string" name="CLOSE">CLOSE</item>
@@ -151,18 +135,13 @@
         <item type="string" name="NIGHT">NIGHT</item>
         <item type="string" name="ASIAN">ASIAN</item>
         <item type="string" name="LEAST">LEAST</item>
-        <item type="string" name="CROSS">CROSS</item>
         <item type="string" name="ABOVE">ABOVE</item>
         <item type="string" name="FRONT">FRONT</item>
-        <item type="string" name="MEANS">MEANS</item>
         <item type="string" name="UPPER">UPPER</item>
         <item type="string" name="MAYOR">MAYOR</item>
-        <item type="string" name="SHOWS">SHOWS</item>
-        <item type="string" name="PRESS">PRESS</item>
         <item type="string" name="BEACH">BEACH</item>
         <item type="string" name="MOVIE">MOVIE</item>
         <item type="string" name="DANCE">DANCE</item>
-        <item type="string" name="ROLES">ROLES</item>
         <item type="string" name="OPERA">OPERA</item>
         <item type="string" name="CZECH">CZECH</item>
         <item type="string" name="STONE">STONE</item>
@@ -173,16 +152,12 @@
         <item type="string" name="HOTEL">HOTEL</item>
         <item type="string" name="URBAN">URBAN</item>
         <item type="string" name="QUEEN">QUEEN</item>
-        <item type="string" name="SANTA">SANTA</item>
         <item type="string" name="TOWER">TOWER</item>
         <item type="string" name="LEGAL">LEGAL</item>
         <item type="string" name="PRIME">PRIME</item>
-        <item type="string" name="KOREA">KOREA</item>
         <item type="string" name="HEART">HEART</item>
         <item type="string" name="STAFF">STAFF</item>
-        <item type="string" name="RULES">RULES</item>
         <item type="string" name="SIXTH">SIXTH</item>
-        <item type="string" name="JONES">JONES</item>
         <item type="string" name="JUDGE">JUDGE</item>
         <item type="string" name="REFER">REFER</item>
         <item type="string" name="CHILD">CHILD</item>
@@ -191,54 +166,38 @@
         <item type="string" name="COVER">COVER</item>
         <item type="string" name="BELOW">BELOW</item>
         <item type="string" name="GRADE">GRADE</item>
-        <item type="string" name="SCOTT">SCOTT</item>
-        <item type="string" name="MARIA">MARIA</item>
-        <item type="string" name="LINES">LINES</item>
         <item type="string" name="VOICE">VOICE</item>
-        <item type="string" name="CLUBS">CLUBS</item>
         <item type="string" name="OCEAN">OCEAN</item>
-        <item type="string" name="UNITS">UNITS</item>
         <item type="string" name="NAVAL">NAVAL</item>
         <item type="string" name="MIXED">MIXED</item>
         <item type="string" name="EARTH">EARTH</item>
         <item type="string" name="DAILY">DAILY</item>
-        <item type="string" name="TAMIL">TAMIL</item>
-        <item type="string" name="HILLS">HILLS</item>
         <item type="string" name="SCORE">SCORE</item>
         <item type="string" name="START">START</item>
         <item type="string" name="DRAFT">DRAFT</item>
         <item type="string" name="HORSE">HORSE</item>
         <item type="string" name="SERVE">SERVE</item>
-        <item type="string" name="CORPS">CORPS</item>
         <item type="string" name="MONEY">MONEY</item>
         <item type="string" name="PEACE">PEACE</item>
         <item type="string" name="COMIC">COMIC</item>
         <item type="string" name="BARON">BARON</item>
         <item type="string" name="HONOR">HONOR</item>
         <item type="string" name="METRO">METRO</item>
-        <item type="string" name="FALLS">FALLS</item>
         <item type="string" name="HEAVY">HEAVY</item>
         <item type="string" name="ARENA">ARENA</item>
         <item type="string" name="BRAND">BRAND</item>
-        <item type="string" name="WEEKS">WEEKS</item>
         <item type="string" name="TRAIL">TRAIL</item>
         <item type="string" name="SPEED">SPEED</item>
-        <item type="string" name="SWISS">SWISS</item>
         <item type="string" name="STORE">STORE</item>
-        <item type="string" name="CHRIS">CHRIS</item>
         <item type="string" name="TRUST">TRUST</item>
         <item type="string" name="CRIME">CRIME</item>
         <item type="string" name="BLOCK">BLOCK</item>
         <item type="string" name="PAPER">PAPER</item>
         <item type="string" name="TWICE">TWICE</item>
         <item type="string" name="JOINT">JOINT</item>
-        <item type="string" name="COSTA">COSTA</item>
         <item type="string" name="OWNER">OWNER</item>
         <item type="string" name="WELSH">WELSH</item>
-        <item type="string" name="SITES">SITES</item>
         <item type="string" name="ISSUE">ISSUE</item>
-        <item type="string" name="FOCUS">FOCUS</item>
-        <item type="string" name="BASIS">BASIS</item>
         <item type="string" name="AGENT">AGENT</item>
         <item type="string" name="BLOOD">BLOOD</item>
         <item type="string" name="GUARD">GUARD</item>
@@ -251,18 +210,15 @@
         <item type="string" name="ADULT">ADULT</item>
         <item type="string" name="REACH">REACH</item>
         <item type="string" name="STOCK">STOCK</item>
-        <item type="string" name="SALES">SALES</item>
         <item type="string" name="SNAIL">SNAIL</item>
         <item type="string" name="COLOR">COLOR</item>
         <item type="string" name="TABLE">TABLE</item>
         <item type="string" name="GRANT">GRANT</item>
         <item type="string" name="WHOLE">WHOLE</item>
         <item type="string" name="DRIVE">DRIVE</item>
-        <item type="string" name="BLUES">BLUES</item>
         <item type="string" name="MOTOR">MOTOR</item>
         <item type="string" name="NEPAL">NEPAL</item>
         <item type="string" name="ENTRY">ENTRY</item>
-        <item type="string" name="TOKYO">TOKYO</item>
         <item type="string" name="ARMED">ARMED</item>
         <item type="string" name="STEEL">STEEL</item>
         <item type="string" name="CAUSE">CAUSE</item>
@@ -277,9 +233,7 @@
         <item type="string" name="MONTH">MONTH</item>
         <item type="string" name="BASIN">BASIN</item>
         <item type="string" name="PIANO">PIANO</item>
-        <item type="string" name="MAINE">MAINE</item>
         <item type="string" name="SCENE">SCENE</item>
-        <item type="string" name="METRE">METRE</item>
         <item type="string" name="BASIC">BASIC</item>
         <item type="string" name="BRICK">BRICK</item>
         <item type="string" name="ALLEN">ALLEN</item>
@@ -288,28 +242,18 @@
         <item type="string" name="SHARE">SHARE</item>
         <item type="string" name="PRICE">PRICE</item>
         <item type="string" name="FLOOR">FLOOR</item>
-        <item type="string" name="BANKS">BANKS</item>
         <item type="string" name="CHILE">CHILE</item>
         <item type="string" name="SINGH">SINGH</item>
-        <item type="string" name="TREES">TREES</item>
         <item type="string" name="STORM">STORM</item>
         <item type="string" name="ALLOW">ALLOW</item>
         <item type="string" name="SHORE">SHORE</item>
-        <item type="string" name="LAKES">LAKES</item>
         <item type="string" name="CLARK">CLARK</item>
         <item type="string" name="TRIBE">TRIBE</item>
         <item type="string" name="BIRTH">BIRTH</item>
-        <item type="string" name="DATES">DATES</item>
-        <item type="string" name="KINGS">KINGS</item>
-        <item type="string" name="GLASS">GLASS</item>
-        <item type="string" name="PLANS">PLANS</item>
         <item type="string" name="MIAMI">MIAMI</item>
         <item type="string" name="PILOT">PILOT</item>
         <item type="string" name="KEVIN">KEVIN</item>
         <item type="string" name="RELAY">RELAY</item>
-        <item type="string" name="ROADS">ROADS</item>
-        <item type="string" name="CHESS">CHESS</item>
-        <item type="string" name="JESUS">JESUS</item>
         <item type="string" name="SOLAR">SOLAR</item>
         <item type="string" name="BUILD">BUILD</item>
         <item type="string" name="FIGHT">FIGHT</item>
@@ -324,7 +268,6 @@
         <item type="string" name="SHAPE">SHAPE</item>
         <item type="string" name="SQUAD">SQUAD</item>
         <item type="string" name="INNER">INNER</item>
-        <item type="string" name="PARKS">PARKS</item>
         <item type="string" name="EXIST">EXIST</item>
         <item type="string" name="CLEAR">CLEAR</item>
         <item type="string" name="PHASE">PHASE</item>
@@ -332,7 +275,6 @@
         <item type="string" name="ABBEY">ABBEY</item>
         <item type="string" name="BROAD">BROAD</item>
         <item type="string" name="MANGA">MANGA</item>
-        <item type="string" name="ADAMS">ADAMS</item>
         <item type="string" name="INDEX">INDEX</item>
         <item type="string" name="CONGO">CONGO</item>
         <item type="string" name="OCCUR">OCCUR</item>
@@ -348,47 +290,34 @@
         <item type="string" name="VENUE">VENUE</item>
         <item type="string" name="MILAN">MILAN</item>
         <item type="string" name="KENYA">KENYA</item>
-        <item type="string" name="LANDS">LANDS</item>
         <item type="string" name="SENSE">SENSE</item>
         <item type="string" name="MOUTH">MOUTH</item>
         <item type="string" name="GIANT">GIANT</item>
-        <item type="string" name="HOMES">HOMES</item>
-        <item type="string" name="MILLS">MILLS</item>
-        <item type="string" name="WALLS">WALLS</item>
         <item type="string" name="DREAM">DREAM</item>
         <item type="string" name="LEAVE">LEAVE</item>
-        <item type="string" name="BEARS">BEARS</item>
         <item type="string" name="ANIME">ANIME</item>
         <item type="string" name="STAND">STAND</item>
-        <item type="string" name="HEADS">HEADS</item>
         <item type="string" name="STEAM">STEAM</item>
         <item type="string" name="CLAIM">CLAIM</item>
         <item type="string" name="IDAHO">IDAHO</item>
         <item type="string" name="BIBLE">BIBLE</item>
-        <item type="string" name="GOODS">GOODS</item>
-        <item type="string" name="HANDS">HANDS</item>
         <item type="string" name="OFFER">OFFER</item>
-        <item type="string" name="WINGS">WINGS</item>
         <item type="string" name="RAPID">RAPID</item>
         <item type="string" name="HINDI">HINDI</item>
         <item type="string" name="VOCAL">VOCAL</item>
         <item type="string" name="ROCKY">ROCKY</item>
         <item type="string" name="DERBY">DERBY</item>
-        <item type="string" name="NOTES">NOTES</item>
         <item type="string" name="BAKER">BAKER</item>
         <item type="string" name="FERRY">FERRY</item>
         <item type="string" name="SUGAR">SUGAR</item>
         <item type="string" name="BRAIN">BRAIN</item>
         <item type="string" name="FAITH">FAITH</item>
-        <item type="string" name="FUNDS">FUNDS</item>
         <item type="string" name="PRINT">PRINT</item>
         <item type="string" name="MANOR">MANOR</item>
         <item type="string" name="DELTA">DELTA</item>
         <item type="string" name="CARRY">CARRY</item>
-        <item type="string" name="ROCKS">ROCKS</item>
         <item type="string" name="EQUAL">EQUAL</item>
         <item type="string" name="BRING">BRING</item>
-        <item type="string" name="LIONS">LIONS</item>
         <item type="string" name="TENTH">TENTH</item>
         <item type="string" name="BRIEF">BRIEF</item>
         <item type="string" name="OUTER">OUTER</item>
@@ -398,13 +327,10 @@
         <item type="string" name="WRITE">WRITE</item>
         <item type="string" name="SYRIA">SYRIA</item>
         <item type="string" name="GROVE">GROVE</item>
-        <item type="string" name="ROOTS">ROOTS</item>
         <item type="string" name="ESSEX">ESSEX</item>
-        <item type="string" name="TOOLS">TOOLS</item>
         <item type="string" name="SIEGE">SIEGE</item>
         <item type="string" name="SAUDI">SAUDI</item>
         <item type="string" name="NOBLE">NOBLE</item>
-        <item type="string" name="MARKS">MARKS</item>
         <item type="string" name="ELDER">ELDER</item>
         <item type="string" name="FORUM">FORUM</item>
         <item type="string" name="ROBIN">ROBIN</item>
@@ -417,44 +343,33 @@
         <item type="string" name="WORTH">WORTH</item>
         <item type="string" name="APART">APART</item>
         <item type="string" name="ANGEL">ANGEL</item>
-        <item type="string" name="TOURS">TOURS</item>
         <item type="string" name="STRIP">STRIP</item>
         <item type="string" name="VISIT">VISIT</item>
-        <item type="string" name="WELLS">WELLS</item>
-        <item type="string" name="LINKS">LINKS</item>
         <item type="string" name="UNCLE">UNCLE</item>
         <item type="string" name="PERTH">PERTH</item>
         <item type="string" name="ENTER">ENTER</item>
         <item type="string" name="SOLID">SOLID</item>
-        <item type="string" name="GRASS">GRASS</item>
         <item type="string" name="MOIST">MOIST</item>
-        <item type="string" name="AIRES">AIRES</item>
         <item type="string" name="GHOST">GHOST</item>
         <item type="string" name="ORGAN">ORGAN</item>
         <item type="string" name="GRACE">GRACE</item>
-        <item type="string" name="WOODS">WOODS</item>
         <item type="string" name="QUITE">QUITE</item>
         <item type="string" name="AHEAD">AHEAD</item>
         <item type="string" name="EAGLE">EAGLE</item>
         <item type="string" name="HENCE">HENCE</item>
         <item type="string" name="ELITE">ELITE</item>
         <item type="string" name="RALLY">RALLY</item>
-        <item type="string" name="LEEDS">LEEDS</item>
         <item type="string" name="ISLAM">ISLAM</item>
         <item type="string" name="GLOBE">GLOBE</item>
         <item type="string" name="BOBBY">BOBBY</item>
-        <item type="string" name="MINES">MINES</item>
         <item type="string" name="BEGIN">BEGIN</item>
         <item type="string" name="PLATE">PLATE</item>
         <item type="string" name="CIVIC">CIVIC</item>
         <item type="string" name="CRASH">CRASH</item>
         <item type="string" name="CARGO">CARGO</item>
         <item type="string" name="DATED">DATED</item>
-        <item type="string" name="LEADS">LEADS</item>
         <item type="string" name="PLANE">PLANE</item>
         <item type="string" name="BROOK">BROOK</item>
-        <item type="string" name="TALES">TALES</item>
-        <item type="string" name="CARDS">CARDS</item>
         <item type="string" name="FIXED">FIXED</item>
         <item type="string" name="EXTRA">EXTRA</item>
         <item type="string" name="DOING">DOING</item>
@@ -463,7 +378,6 @@
         <item type="string" name="RULER">RULER</item>
         <item type="string" name="THINK">THINK</item>
         <item type="string" name="SANDY">SANDY</item>
-        <item type="string" name="DRUGS">DRUGS</item>
         <item type="string" name="PLAZA">PLAZA</item>
         <item type="string" name="RABBI">RABBI</item>
         <item type="string" name="RATIO">RATIO</item>
@@ -483,22 +397,17 @@
         <item type="string" name="FRESH">FRESH</item>
         <item type="string" name="CHOIR">CHOIR</item>
         <item type="string" name="SUDAN">SUDAN</item>
-        <item type="string" name="BONUS">BONUS</item>
         <item type="string" name="VINYL">VINYL</item>
         <item type="string" name="TRUTH">TRUTH</item>
         <item type="string" name="LAURA">LAURA</item>
         <item type="string" name="KUMAR">KUMAR</item>
         <item type="string" name="TIGER">TIGER</item>
-        <item type="string" name="PAGES">PAGES</item>
         <item type="string" name="CLOUD">CLOUD</item>
         <item type="string" name="RIVAL">RIVAL</item>
         <item type="string" name="SEOUL">SEOUL</item>
         <item type="string" name="DEPOT">DEPOT</item>
         <item type="string" name="SPEAK">SPEAK</item>
-        <item type="string" name="FLIES">FLIES</item>
-        <item type="string" name="SHOPS">SHOPS</item>
         <item type="string" name="WHEEL">WHEEL</item>
-        <item type="string" name="VIRUS">VIRUS</item>
         <item type="string" name="BLIND">BLIND</item>
         <item type="string" name="USAGE">USAGE</item>
         <item type="string" name="IRAQI">IRAQI</item>
@@ -510,7 +419,6 @@
         <item type="string" name="CHASE">CHASE</item>
         <item type="string" name="MALTA">MALTA</item>
         <item type="string" name="CANON">CANON</item>
-        <item type="string" name="RATES">RATES</item>
         <item type="string" name="UNITY">UNITY</item>
         <item type="string" name="MOUSE">MOUSE</item>
         <item type="string" name="RAISE">RAISE</item>
@@ -534,13 +442,9 @@
         <item type="string" name="HAVEN">HAVEN</item>
         <item type="string" name="SLAVE">SLAVE</item>
         <item type="string" name="CRAFT">CRAFT</item>
-        <item type="string" name="SEEDS">SEEDS</item>
         <item type="string" name="SHIRE">SHIRE</item>
         <item type="string" name="RADAR">RADAR</item>
-        <item type="string" name="FILES">FILES</item>
-        <item type="string" name="DEALS">DEALS</item>
         <item type="string" name="SHEEP">SHEEP</item>
-        <item type="string" name="LORDS">LORDS</item>
         <item type="string" name="REMIX">REMIX</item>
         <item type="string" name="RANCH">RANCH</item>
         <item type="string" name="PEARL">PEARL</item>
@@ -558,7 +462,6 @@
         <item type="string" name="ROUGH">ROUGH</item>
         <item type="string" name="CLERK">CLERK</item>
         <item type="string" name="DUBAI">DUBAI</item>
-        <item type="string" name="GATES">GATES</item>
         <item type="string" name="PITCH">PITCH</item>
         <item type="string" name="LUNAR">LUNAR</item>
         <item type="string" name="CLOCK">CLOCK</item>
@@ -568,13 +471,11 @@
         <item type="string" name="GRAPH">GRAPH</item>
         <item type="string" name="FIFTY">FIFTY</item>
         <item type="string" name="VERSE">VERSE</item>
-        <item type="string" name="BURNS">BURNS</item>
         <item type="string" name="MORAL">MORAL</item>
         <item type="string" name="CEDAR">CEDAR</item>
         <item type="string" name="LEONE">LEONE</item>
         <item type="string" name="WIDOW">WIDOW</item>
         <item type="string" name="LEARN">LEARN</item>
-        <item type="string" name="BATES">BATES</item>
         <item type="string" name="BRUNO">BRUNO</item>
         <item type="string" name="MAKER">MAKER</item>
         <item type="string" name="SHIFT">SHIFT</item>
@@ -589,8 +490,6 @@
         <item type="string" name="FAVOR">FAVOR</item>
         <item type="string" name="ARRAY">ARRAY</item>
         <item type="string" name="USUAL">USUAL</item>
-        <item type="string" name="FOODS">FOODS</item>
-        <item type="string" name="TURNS">TURNS</item>
         <item type="string" name="SMART">SMART</item>
         <item type="string" name="PHOTO">PHOTO</item>
         <item type="string" name="FLASH">FLASH</item>
@@ -604,21 +503,15 @@
         <item type="string" name="LOGAN">LOGAN</item>
         <item type="string" name="QATAR">QATAR</item>
         <item type="string" name="MALAY">MALAY</item>
-        <item type="string" name="GROSS">GROSS</item>
         <item type="string" name="MAPLE">MAPLE</item>
         <item type="string" name="DWARF">DWARF</item>
         <item type="string" name="CANOE">CANOE</item>
         <item type="string" name="SUITE">SUITE</item>
         <item type="string" name="GRAIN">GRAIN</item>
         <item type="string" name="NOTRE">NOTRE</item>
-        <item type="string" name="RINGS">RINGS</item>
-        <item type="string" name="PORTS">PORTS</item>
         <item type="string" name="POKER">POKER</item>
         <item type="string" name="READY">READY</item>
-        <item type="string" name="WATTS">WATTS</item>
-        <item type="string" name="HAYES">HAYES</item>
         <item type="string" name="SHEET">SHEET</item>
-        <item type="string" name="BONES">BONES</item>
         <item type="string" name="SWING">SWING</item>
         <item type="string" name="TRUNK">TRUNK</item>
         <item type="string" name="DEVIL">DEVIL</item>
@@ -634,19 +527,15 @@
         <item type="string" name="LASER">LASER</item>
         <item type="string" name="SAMOA">SAMOA</item>
         <item type="string" name="CAIRO">CAIRO</item>
-        <item type="string" name="TWINS">TWINS</item>
         <item type="string" name="QUEST">QUEST</item>
         <item type="string" name="TIBET">TIBET</item>
         <item type="string" name="SHALL">SHALL</item>
         <item type="string" name="TREAT">TREAT</item>
         <item type="string" name="STEEP">STEEP</item>
         <item type="string" name="GLORY">GLORY</item>
-        <item type="string" name="ATLAS">ATLAS</item>
         <item type="string" name="ASIDE">ASIDE</item>
         <item type="string" name="IDEAL">IDEAL</item>
-        <item type="string" name="FIRMS">FIRMS</item>
         <item type="string" name="CURVE">CURVE</item>
-        <item type="string" name="HAWKS">HAWKS</item>
         <item type="string" name="SPELL">SPELL</item>
         <item type="string" name="GABLE">GABLE</item>
         <item type="string" name="TOPIC">TOPIC</item>
@@ -667,10 +556,8 @@
         <item type="string" name="CIRCA">CIRCA</item>
         <item type="string" name="SWIFT">SWIFT</item>
         <item type="string" name="LOOSE">LOOSE</item>
-        <item type="string" name="BRASS">BRASS</item>
         <item type="string" name="FRAUD">FRAUD</item>
         <item type="string" name="CRAZY">CRAZY</item>
-        <item type="string" name="DRESS">DRESS</item>
         <item type="string" name="FEWER">FEWER</item>
         <item type="string" name="VISTA">VISTA</item>
         <item type="string" name="TENOR">TENOR</item>
@@ -684,7 +571,6 @@
         <item type="string" name="NEGRO">NEGRO</item>
         <item type="string" name="DENSE">DENSE</item>
         <item type="string" name="HONEY">HONEY</item>
-        <item type="string" name="DOWNS">DOWNS</item>
         <item type="string" name="SHOCK">SHOCK</item>
         <item type="string" name="PROOF">PROOF</item>
         <item type="string" name="LIBYA">LIBYA</item>
@@ -704,14 +590,12 @@
         <item type="string" name="LYNCH">LYNCH</item>
         <item type="string" name="DRAKE">DRAKE</item>
         <item type="string" name="ASSET">ASSET</item>
-        <item type="string" name="VENUS">VENUS</item>
         <item type="string" name="MOTTO">MOTTO</item>
         <item type="string" name="VICAR">VICAR</item>
         <item type="string" name="ESSAY">ESSAY</item>
         <item type="string" name="BLADE">BLADE</item>
         <item type="string" name="ABBOT">ABBOT</item>
         <item type="string" name="DEITY">DEITY</item>
-        <item type="string" name="ISLES">ISLES</item>
         <item type="string" name="BLUFF">BLUFF</item>
         <item type="string" name="VAULT">VAULT</item>
         <item type="string" name="FEAST">FEAST</item>
@@ -733,7 +617,6 @@
         <item type="string" name="GRAPE">GRAPE</item>
         <item type="string" name="KUALA">KUALA</item>
         <item type="string" name="CANDY">CANDY</item>
-        <item type="string" name="SCOTS">SCOTS</item>
         <item type="string" name="FORTH">FORTH</item>
         <item type="string" name="DAISY">DAISY</item>
         <item type="string" name="STINT">STINT</item>
@@ -776,13 +659,11 @@
         <item type="string" name="LEASE">LEASE</item>
         <item type="string" name="HUMOR">HUMOR</item>
         <item type="string" name="STAKE">STAKE</item>
-        <item type="string" name="ROSES">ROSES</item>
         <item type="string" name="PRATT">PRATT</item>
         <item type="string" name="ASTON">ASTON</item>
         <item type="string" name="TULSA">TULSA</item>
         <item type="string" name="SHOOT">SHOOT</item>
         <item type="string" name="SWORN">SWORN</item>
-        <item type="string" name="LOTUS">LOTUS</item>
         <item type="string" name="NIGEL">NIGEL</item>
         <item type="string" name="YUKON">YUKON</item>
         <item type="string" name="FROST">FROST</item>
@@ -792,7 +673,6 @@
         <item type="string" name="DOVER">DOVER</item>
         <item type="string" name="BOOTH">BOOTH</item>
         <item type="string" name="BUDDY">BUDDY</item>
-        <item type="string" name="ALIAS">ALIAS</item>
         <item type="string" name="LINER">LINER</item>
         <item type="string" name="LOYAL">LOYAL</item>
         <item type="string" name="OMEGA">OMEGA</item>
@@ -812,13 +692,10 @@
         <item type="string" name="STONY">STONY</item>
         <item type="string" name="SIOUX">SIOUX</item>
         <item type="string" name="INTEL">INTEL</item>
-        <item type="string" name="CHAOS">CHAOS</item>
         <item type="string" name="FAMED">FAMED</item>
         <item type="string" name="SOLVE">SOLVE</item>
         <item type="string" name="HAIRY">HAIRY</item>
-        <item type="string" name="SANDS">SANDS</item>
         <item type="string" name="FLINT">FLINT</item>
-        <item type="string" name="TURKS">TURKS</item>
         <item type="string" name="MARRY">MARRY</item>
         <item type="string" name="YIELD">YIELD</item>
         <item type="string" name="SONIC">SONIC</item>
@@ -830,7 +707,6 @@
         <item type="string" name="COMET">COMET</item>
         <item type="string" name="CLIMB">CLIMB</item>
         <item type="string" name="FLOUR">FLOUR</item>
-        <item type="string" name="BELLS">BELLS</item>
         <item type="string" name="PAVED">PAVED</item>
         <item type="string" name="FATAL">FATAL</item>
         <item type="string" name="WHALE">WHALE</item>
@@ -838,7 +714,6 @@
         <item type="string" name="SLATE">SLATE</item>
         <item type="string" name="LYRIC">LYRIC</item>
         <item type="string" name="SYNOD">SYNOD</item>
-        <item type="string" name="TRANS">TRANS</item>
         <item type="string" name="ALLEY">ALLEY</item>
         <item type="string" name="FLAME">FLAME</item>
         <item type="string" name="POUND">POUND</item>
@@ -877,7 +752,6 @@
         <item type="string" name="HELLO">HELLO</item>
         <item type="string" name="JUICE">JUICE</item>
         <item type="string" name="BLOOM">BLOOM</item>
-        <item type="string" name="BOXES">BOXES</item>
         <item type="string" name="BLEND">BLEND</item>
         <item type="string" name="AGING">AGING</item>
         <item type="string" name="BATON">BATON</item>
@@ -908,7 +782,6 @@
         <item type="string" name="FLESH">FLESH</item>
         <item type="string" name="PIPER">PIPER</item>
         <item type="string" name="SPITE">SPITE</item>
-        <item type="string" name="DUCKS">DUCKS</item>
         <item type="string" name="GOOSE">GOOSE</item>
         <item type="string" name="MOOSE">MOOSE</item>
         <item type="string" name="CLASH">CLASH</item>
@@ -935,15 +808,11 @@
         <item type="string" name="PULSE">PULSE</item>
         <item type="string" name="SHALE">SHALE</item>
         <item type="string" name="FUNNY">FUNNY</item>
-        <item type="string" name="BOOTS">BOOTS</item>
         <item type="string" name="PANIC">PANIC</item>
         <item type="string" name="PAGAN">PAGAN</item>
-        <item type="string" name="KNOWS">KNOWS</item>
         <item type="string" name="CHORD">CHORD</item>
         <item type="string" name="CODEX">CODEX</item>
         <item type="string" name="PUNCH">PUNCH</item>
-        <item type="string" name="NAZIS">NAZIS</item>
-        <item type="string" name="CHIPS">CHIPS</item>
         <item type="string" name="CURSE">CURSE</item>
         <item type="string" name="WRECK">WRECK</item>
         <item type="string" name="CURRY">CURRY</item>
@@ -955,10 +824,8 @@
         <item type="string" name="MORSE">MORSE</item>
         <item type="string" name="BRAVO">BRAVO</item>
         <item type="string" name="BEARD">BEARD</item>
-        <item type="string" name="BUCKS">BUCKS</item>
         <item type="string" name="SHINE">SHINE</item>
         <item type="string" name="SKATE">SKATE</item>
-        <item type="string" name="HICKS">HICKS</item>
         <item type="string" name="ADOBE">ADOBE</item>
         <item type="string" name="DIXIE">DIXIE</item>
         <item type="string" name="REVUE">REVUE</item>
@@ -996,22 +863,17 @@
         <item type="string" name="AUDIT">AUDIT</item>
         <item type="string" name="CYBER">CYBER</item>
         <item type="string" name="PROUD">PROUD</item>
-        <item type="string" name="SEARS">SEARS</item>
         <item type="string" name="SLANG">SLANG</item>
         <item type="string" name="MAXIM">MAXIM</item>
-        <item type="string" name="DEMOS">DEMOS</item>
         <item type="string" name="FORGE">FORGE</item>
         <item type="string" name="TORAH">TORAH</item>
         <item type="string" name="CLICK">CLICK</item>
         <item type="string" name="BUNNY">BUNNY</item>
         <item type="string" name="ANGRY">ANGRY</item>
         <item type="string" name="ONSET">ONSET</item>
-        <item type="string" name="ROLLS">ROLLS</item>
         <item type="string" name="CHALK">CHALK</item>
         <item type="string" name="THIEF">THIEF</item>
         <item type="string" name="BEECH">BEECH</item>
-        <item type="string" name="WILLS">WILLS</item>
-        <item type="string" name="OASIS">OASIS</item>
         <item type="string" name="NIECE">NIECE</item>
         <item type="string" name="PURSE">PURSE</item>
         <item type="string" name="BATCH">BATCH</item>
@@ -1026,17 +888,13 @@
         <item type="string" name="MURAL">MURAL</item>
         <item type="string" name="FAINT">FAINT</item>
         <item type="string" name="HAZEL">HAZEL</item>
-        <item type="string" name="ARABS">ARABS</item>
         <item type="string" name="SMASH">SMASH</item>
         <item type="string" name="VOGUE">VOGUE</item>
         <item type="string" name="ORION">ORION</item>
         <item type="string" name="ALERT">ALERT</item>
-        <item type="string" name="SERBS">SERBS</item>
-        <item type="string" name="YATES">YATES</item>
         <item type="string" name="TITAN">TITAN</item>
         <item type="string" name="DRIFT">DRIFT</item>
         <item type="string" name="WALTZ">WALTZ</item>
-        <item type="string" name="BLISS">BLISS</item>
         <item type="string" name="PEACH">PEACH</item>
         <item type="string" name="SINAI">SINAI</item>
         <item type="string" name="RIGID">RIGID</item>
@@ -1053,7 +911,6 @@
         <item type="string" name="SEDAN">SEDAN</item>
         <item type="string" name="STING">STING</item>
         <item type="string" name="LANGE">LANGE</item>
-        <item type="string" name="HERBS">HERBS</item>
         <item type="string" name="SHAKE">SHAKE</item>
         <item type="string" name="ROWAN">ROWAN</item>
         <item type="string" name="HOBBY">HOBBY</item>
@@ -1063,7 +920,6 @@
         <item type="string" name="MERRY">MERRY</item>
         <item type="string" name="QUEER">QUEER</item>
         <item type="string" name="STUFF">STUFF</item>
-        <item type="string" name="WAGES">WAGES</item>
         <item type="string" name="FANNY">FANNY</item>
         <item type="string" name="RODEO">RODEO</item>
         <item type="string" name="PENAL">PENAL</item>
@@ -1104,8 +960,6 @@
         <item type="string" name="VANCE">VANCE</item>
         <item type="string" name="MILKY">MILKY</item>
         <item type="string" name="MECCA">MECCA</item>
-        <item type="string" name="MEALS">MEALS</item>
-        <item type="string" name="TUFTS">TUFTS</item>
         <item type="string" name="CRACK">CRACK</item>
         <item type="string" name="ALARM">ALARM</item>
         <item type="string" name="SWEEP">SWEEP</item>
@@ -1143,5 +997,32 @@
         <item type="string" name="STOUT">STOUT</item>
         <item type="string" name="REEVE">REEVE</item>
         <item type="string" name="MANGO">MANGO</item>
+        <item type="string" name="GENUS">GENUS</item>
+        <item type="string" name="CLASS">CLASS</item>
+        <item type="string" name="CROSS">CROSS</item>
+        <item type="string" name="MEANS">MEANS</item>
+        <item type="string" name="PRESS">PRESS</item>
+        <item type="string" name="CORPS">CORPS</item>
+        <item type="string" name="FALLS">FALLS</item>
+        <item type="string" name="FOCUS">FOCUS</item>
+        <item type="string" name="BASIS">BASIS</item>
+        <item type="string" name="BLUES">BLUES</item>
+        <item type="string" name="GLASS">GLASS</item>
+        <item type="string" name="PLANS">PLANS</item>
+        <item type="string" name="CHESS">CHESS</item>
+        <item type="string" name="GRASS">GRASS</item>
+        <item type="string" name="BONUS">BONUS</item>
+        <item type="string" name="VIRUS">VIRUS</item>
+        <item type="string" name="GROSS">GROSS</item>
+        <item type="string" name="BRASS">BRASS</item>
+        <item type="string" name="DRESS">DRESS</item>
+        <item type="string" name="VENUS">VENUS</item>
+        <item type="string" name="LOTUS">LOTUS</item>
+        <item type="string" name="ALIAS">ALIAS</item>
+        <item type="string" name="CHAOS">CHAOS</item>
+        <item type="string" name="TRANS">TRANS</item>
+        <item type="string" name="ROLLS">ROLLS</item>
+        <item type="string" name="OASIS">OASIS</item>
+        <item type="string" name="BLISS">BLISS</item>
     </string-array>
 </resources>

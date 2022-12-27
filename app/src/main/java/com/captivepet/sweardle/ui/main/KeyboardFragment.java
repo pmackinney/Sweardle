@@ -1,6 +1,5 @@
 package com.captivepet.sweardle.ui.main;
 
-import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -36,13 +35,10 @@ public class KeyboardFragment extends Fragment {
 
     private MainViewModel mViewModel;
     private ConstraintLayout mLayout;
-    private float keyboardWeight;
     private int keyHeight;
     private int keyWidth;
     private int specialKeyWidth;
     private int keyMargin;
-    float newTotalWeight;
-    float newKeyboardWeight;
     final int KEY_WIDTH_DIVISOR = 12; // How many keys wide is the full KB width?
     final int KEY_MARGIN_DIVISOR = 12; // How many margins = 1 key?
     public static final float KEYBOARD_WIDTH_TO_HEIGHT_RATIO = 2 / 3F;
@@ -56,11 +52,16 @@ public class KeyboardFragment extends Fragment {
     public static final char firstLetter = 'A';
     public static final char lastLetter = 'Z';
     public static final char BLANK = ' ';
-    public static final char ENTER = '⏎';
+    public static final char ENTER = '⬅';
     public static final char DEL = '⌫';
+
+    //    Unicode: U+232B, UTF-8: E2 8C AB
+
     private static final AppCompatButton[] key = new AppCompatButton[KEY_LABEL.length];
     private ImageButton enterButton;
-    private ImageButton delButton;
+//    private AppCompatButton enterButton;
+    //private ImageButton delButton;
+    private AppCompatButton delButton;
 
     public KeyboardFragment() {
     } // Required empty public constructor ??
@@ -99,6 +100,7 @@ public class KeyboardFragment extends Fragment {
             enterButton = new ImageButton(getContext());
             enterButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
             enterButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_keyboard_return_24));
+//            enterButton.setText(String.format(Locale.US, "%c", ENTER));
             enterButton.setTag(KeyboardFragment.ENTER);
             enterButton.setId(View.generateViewId());
             enterButton.setOnClickListener(new View.OnClickListener() {
@@ -112,9 +114,12 @@ public class KeyboardFragment extends Fragment {
             });
             mLayout.addView(enterButton);
 
-            delButton = new ImageButton(getContext());
+            //delButton = new ImageButton(getContext());
+            delButton = new AppCompatButton(getContext());
             delButton.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.frame_highlight));
-            delButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_undo_24));
+            //delButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), android.R.drawable.ic_delete));
+            //delButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(), android.R.drawable.ic_menu_upload));
+            delButton.setText(String.format(Locale.US, "%c", DEL));
             delButton.setTag(KeyboardFragment.DEL);
             delButton.setId(View.generateViewId());
             delButton.setOnClickListener(new View.OnClickListener() {
