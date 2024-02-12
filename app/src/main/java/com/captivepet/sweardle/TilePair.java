@@ -1,11 +1,5 @@
 package com.captivepet.sweardle;
 
-import com.captivepet.sweardle.ui.main.GameFragment;
-
-import java.util.ArrayList;
-
-import kotlin.UNumbersKt;
-
 // https://alvinalexander.com/java/java-tuple-classes/
 public class TilePair {
     private char c;

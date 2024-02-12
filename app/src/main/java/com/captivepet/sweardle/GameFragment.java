@@ -1,4 +1,4 @@
-package com.captivepet.sweardle.ui.main;
+package com.captivepet.sweardle;
 
 import static com.captivepet.sweardle.R.id.fragment_game;
 import androidx.appcompat.app.AppCompatActivity;
@@ -7,7 +7,8 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.lifecycle.LifecycleOwner;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.appcompat.app.AlertDialog;
 
@@ -26,8 +27,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-import com.captivepet.sweardle.R;
-import com.captivepet.sweardle.TilePair;
 
 import java.util.List;
 
@@ -45,6 +44,7 @@ public class GameFragment extends Fragment {
     public final static int WORD_LENGTH = 5;
     public final static char EMPTY = ' ';
     public static final String BAD_WORD = "Guess not in dict";
+    private ViewGroup container;
 
     public static GameFragment newInstance() {
         return new GameFragment();
@@ -54,6 +54,7 @@ public class GameFragment extends Fragment {
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+                this.container = container;
                 setHasOptionsMenu(true);
                 return inflater.inflate(R.layout.fragment_game, container, false);
     }
@@ -74,6 +75,32 @@ public class GameFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+//    https://stackoverflow.com/questions/20934634/android-menu-item-open-new-fragment
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item){
+//        switch (item.getItemId()){
+//
+//            case R.id.action_reset:
+//
+//                Unsafe.uhs1a.setSelection(0);
+//                Unsafe.uhs1b.setSelection(0);
+//                Unsafe.uhs1c.setSelection(0);
+//                Precondition.phs1a.setSelection(0);
+//                Precondition.phs1b.setSelection(0);
+//                Precondition.phs1c.setSelection(0);
+//
+//            case R.id.action_about:
+//                Fragment newFragment = new TheFragmentYouWantToOpen();
+//                FragmentManager fragmentManager = getFragmentManager();
+//                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//                fragmentTransaction.replace(R.id.frame_container, newFragment);
+//                fragmentTransaction.addToBackStack(null);
+//                fragmentTransaction.commit();
+//                //frame_container is the id of the container for the fragment
+//                return true;
+//            default:
+//                return super.onOptionsItemSelected(item);
+//        }
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         // Handle item selection
@@ -83,6 +110,15 @@ public class GameFragment extends Fragment {
                 return true;
             case R.id.statistics:
                 this.showStatistics();
+                return true;
+            case R.id.menu_expert:
+                Fragment newFragment = new ExpertFragment();
+                FragmentManager fragmentManager = getParentFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.fragment_main, newFragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+                //frame_container is the id of the container for the fragment
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

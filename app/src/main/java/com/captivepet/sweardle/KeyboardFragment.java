@@ -1,4 +1,4 @@
-package com.captivepet.sweardle.ui.main;
+package com.captivepet.sweardle;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -21,10 +21,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import java.util.List;
 import java.util.Locale;
-
-import com.captivepet.sweardle.MainActivity;
-import com.captivepet.sweardle.R;
-import com.captivepet.sweardle.TilePair;
 
 
 /**

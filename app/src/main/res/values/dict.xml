@@ -1,5 +1,5 @@
 <resources>
-    <string-array name="dict">
+    <string-array name="dict" id="@+id/dict" >
         <item type="string" name="AARON">AARON</item>
         <item type="string" name="ABACK">ABACK</item>
         <item type="string" name="ABAFT">ABAFT</item>

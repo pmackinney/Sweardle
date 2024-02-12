@@ -1,15 +1,17 @@
-package com.captivepet.sweardle.ui.main;
+package com.captivepet.sweardle;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.captivepet.sweardle.GameFragment;
+import com.captivepet.sweardle.KeyboardFragment;
 import com.captivepet.sweardle.TilePair;
 import com.captivepet.sweardle.R;
 

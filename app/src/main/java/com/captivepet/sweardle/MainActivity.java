@@ -4,22 +4,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.util.Size;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import com.captivepet.sweardle.ui.main.GameFragment;
-import com.captivepet.sweardle.ui.main.KeyboardFragment;
 
 public class MainActivity extends AppCompatActivity {
+    private String TAG = "MainActivity";
     private int keyboardWidth;
     private int gameboardSize;
     private GameFragment game;
     private KeyboardFragment keyboard;
+    private MainFragment main;
     private ViewGroup container;
     private final int GAME = 0;
     private final int KEYBOARD = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,24 +27,27 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState == null) {
-            keyboard = KeyboardFragment.newInstance();
+            main = MainFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(
-                    R.id.keyboard_fragment, keyboard).commitNow();
+                    R.id.main, main).commitNow();
             game = GameFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(
-                    R.id.game_fragment, game).commitNow();
+                    R.id.game, game).commitNow();
+            keyboard = KeyboardFragment.newInstance();
+            getSupportFragmentManager().beginTransaction().replace(
+                    R.id.keyboard, keyboard).commitNow();
         }
     }
 
     @Override
     protected void onResume() {
         if (game == null) {
-            game = (GameFragment) getSupportFragmentManager().findFragmentById(R.id.game_fragment);
+            game = (GameFragment) getSupportFragmentManager().findFragmentById(R.id.game);
         }
         if (keyboard == null) {
-            keyboard = (KeyboardFragment) getSupportFragmentManager().findFragmentById(R.id.keyboard_fragment);
+            keyboard = (KeyboardFragment) getSupportFragmentManager().findFragmentById(R.id.keyboard);
         }
-        container = findViewById(R.id.container);
+        container = findViewById(R.id.fragment_main);
         View parent = (View) container.getParent();
         parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -84,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
             gameboardSize = Math.min(windowSize.x, (int) (KeyboardFragment.KEYBOARD_WIDTH_TO_HEIGHT_RATIO * windowSize.y));
         } else { // landscape
             gameboardSize = (int) Math.min(windowSize.x - windowSize.y, windowSize.x / 2f);
+            gameboardSize = (int) Math.min(windowSize.y, gameboardSize);
             keyboardWidth = windowSize.x - gameboardSize;
         }
     }

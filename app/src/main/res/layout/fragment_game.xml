@@ -6,5 +6,5 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/frame_highlight"
-    tools:context=".ui.main.GameFragment">
+    tools:context=".GameFragment">
 </androidx.constraintlayout.widget.ConstraintLayout>
