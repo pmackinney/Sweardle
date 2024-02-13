@@ -69,7 +69,12 @@ public class ExpertFragment extends Fragment {
 
         // https://abhiandroid.com/ui/listview#gsc.tab=0
         dictionary = requireActivity().findViewById(R.id.listview_wordlist);
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getContext(), R.layout.fragment_expert, R.id.dictionaryArray, getResources().getStringArray(R.array.dict));
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
+                getContext(),
+                R.layout.fragment_dictionary,
+                R.id.dictionaryArray,
+                getResources().getStringArray(R.array.dict)
+        );
         dictionary.setAdapter(arrayAdapter);
 
         binding.buttonClosebox.setOnClickListener(new View.OnClickListener() {

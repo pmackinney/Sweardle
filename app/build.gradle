@@ -7,14 +7,11 @@ android {
         debug {
             
         }
-        buildFeatures {
-            dataBinding true
-        }
     }
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.sweardle"
+        applicationId "com.captivepet.sweardle"
         minSdk 30
         targetSdk 34
         versionCode 1
@@ -30,6 +27,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    dataBinding {
+        enabled = true
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
